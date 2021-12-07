@@ -10,7 +10,6 @@ BEGIN {
     use_ok( 'WebService::Xero' ) || print "Bail out!\n";
     use_ok( 'WebService::Xero::Agent' ) || print "Bail out!\n";
     use_ok( 'WebService::Xero::Agent::PublicApplication' )  || print "Bail out!\n";
-    use_ok( 'WebService::Xero::Agent::PrivateApplication' ) || print "Bail out!\n";
     #use_ok( 'WebService::Xero::Agent::PartnerApplication' ) || print "Bail out!\n";
 }
 

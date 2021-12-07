@@ -20,7 +20,6 @@ BEGIN {
     use_ok( 'WebService::Xero::Invoice' ) || print "Bail out!\n";
     use_ok( 'WebService::Xero::Item' ) || print "Bail out!\n";
 
-    use_ok( 'WebService::Xero::Agent::PrivateApplication' ) || print "Bail out!\n";
     use_ok( 'WebService::Xero::Agent::PublicApplication' ) || print "Bail out!\n";
     #ok( my $xero = WebService::Xero::Agent->new(), 'New Xero::Agent');
     ok( 1==1, 'New WebService::Xero::Agent');
@@ -41,14 +40,14 @@ BEGIN {
 
 
 
-              ## SKIP PRIVATE APPLICATION UNLESS VALID KEY FILE PROVIDED IN CONFIG
+              ## SKIP PUBLIC APPLICATION UNLESS VALID KEY FILE PROVIDED IN CONFIG
               diag(' --- SKIPPING PRIVATE API CONFIG - KEYFILE NOT FOUND') unless (-e $config->{PRIVATE_APPLICATION}{KEYFILE} );
               SKIP: {
                   skip("no Private API config",7) unless (-e $config->{PRIVATE_APPLICATION}{KEYFILE} );
-                  #ok( $config->{PRIVATE_APPLICATION}{CONSUMER_KEY} ne 'YOUR_OAUTH_CONSUMER_KEY', 'Private API Consumer key not left as default' );
+                  #ok( $config->{PUBLIC_APPLICATION}{CONSUMER_KEY} ne 'YOUR_OAUTH_CONSUMER_KEY', 'Private API Consumer key not left as default' );
                   ok ( my $pk_text = read_file( $config->{PRIVATE_APPLICATION}{KEYFILE} ), 'load private key file');
                   ok ( my $pko = Crypt::OpenSSL::RSA->new_private_key( $pk_text ), 'Generate RSA Object from private key file' );
-                  ok ( my $xero = WebService::Xero::Agent::PrivateApplication->new( 
+                  ok ( my $xero = WebService::Xero::Agent::PublicApplication->new( 
                                                           NAME            => $config->{PRIVATE_APPLICATION}{NAME},
                                                           CONSUMER_KEY    => $config->{PRIVATE_APPLICATION}{CONSUMER_KEY}, 
                                                           CONSUMER_SECRET => $config->{PRIVATE_APPLICATION}{CONSUMER_SECRET}, 

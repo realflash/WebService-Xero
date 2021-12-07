@@ -17,12 +17,12 @@ use Config::Tiny;
 
 
 BEGIN {
-    use_ok( 'WebService::Xero::Agent::PrivateApplication' ) || print "Bail out!\n";
+    use_ok( 'WebService::Xero::Agent::PublicApplication' ) || print "Bail out!\n";
 
     # my $xero = 
 
     # as_text
-    is( WebService::Xero::Agent::PrivateApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
+    is( WebService::Xero::Agent::PublicApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
 
 
 
@@ -43,13 +43,13 @@ IKzzVn7G0kH+/TqtTPdizrDJkg/rsnrTpvHi8eeMZlAy
 -----END RSA PRIVATE KEY-----';
 
     ## test a valid although unusable configuration
-    ok( my $xero = WebService::Xero::Agent::PrivateApplication->new( CONSUMER_KEY    => 'CKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCK', 
+    ok( my $xero = WebService::Xero::Agent::PublicApplication->new( CONSUMER_KEY    => 'CKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCK', 
                                                           CONSUMER_SECRET => 'CSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCS', 
                                                           #KEYFILE         => "/Users/peter/gc-drivers/conf/xero_private_key.pem"
                                                           PRIVATE_KEY => $fake_key, ) ,  'New Xero Private Application Agent' );
-    is( ref($xero), 'WebService::Xero::Agent::PrivateApplication', 'created Xero object is the right type' );
+    is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
-    like ( $xero->as_text(), qr/WebService::Xero::Agent::PrivateApplication/, 'as_text()' );
+    like ( $xero->as_text(), qr/WebService::Xero::Agent::PublicApplication/, 'as_text()' );
 
     is( $xero->get_all_xero_products_from_xero(), undef, "attempt to get from xero fails with invalid credentials" );
 

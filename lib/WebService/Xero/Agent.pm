@@ -42,7 +42,6 @@ You should not need to use this directly but should use one of the derived class
 
 see the following for usage examples:
 
-  perldoc WebService::Xero::Agent::PrivateApplication
   perldoc WebService::Xero::Agent::PublicApplication
 
 

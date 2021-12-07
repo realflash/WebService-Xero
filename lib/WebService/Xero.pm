@@ -6,7 +6,7 @@ use warnings;
 
 =head1 NAME
 
-WebService::Xero - Access Xero Accounting Package Public and Private Application API
+WebService::Xero - Access Xero Accounting Package Public API
 
 =head1 VERSION
 
@@ -32,23 +32,14 @@ and with the Configured Application Authentication Credentials from L<https://ap
 
 this module will allow to to access the API Services.
 
-Xero provides Private, Public and Partner Applications. This module currently supports the Private and Public Application types.
+Xero provides Public Applications only. You can choose whether or not to publish them in the marketplace. The simpler Private Applications are no longer available, and nor are any tenant-wide API keys. You must perform user-specific OAuth2 authentication, which this module implements for you.
 
-The simplest implementation uses a Private Application as follows:
+This is the simplest possible implementation:
 
-    use WebService::Xero::Agent::PrivateApplication;
+    use WebService::Xero::Agent::PublicApplication;
     use Data::Dumper;
 
-    my $xero = WebService::Xero::Agent::PrivateApplication->new( CONSUMER_KEY    => 'YOUR_OAUTH_CONSUMER_KEY', 
-                                                          CONSUMER_SECRET => 'YOUR_OAUTH_CONSUMER_SECRET', 
-                                                          PRIVATE_KEY         => "-----BEGIN RSA PRIVATE KEY-----.........." 
-                                                          );
-    ## AND THEN ACCESS THE API POINTS
-
-    my $contact_struct = $xero->do_xero_api_call( 'https://api.xero.com/api.xro/2.0/Contacts' );
-
-    print Dumper $contact_struct; ## should contain an array of hashes containing contact data.
-
+    TODO
 
 =head2 Limits
 

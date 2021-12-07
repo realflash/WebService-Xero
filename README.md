@@ -8,8 +8,7 @@
 Perl CPAN style module to simplify integration with [Xero API Applications](https://developer.xero.com)
 
 Inspired by the Xero endorsed Ruby API Library [Xeroizer] 
-and the CPAN [Net::Xero](http://search.cpan.org/~elliott/Net-Xero/lib/Net/Xero.pm) module, this Perl module aims to simplify integration with Xero API Applications
-points for Public, Private and in the future Partner application services.
+and the CPAN [Net::Xero](http://search.cpan.org/~elliott/Net-Xero/lib/Net/Xero.pm) module, this Perl module aims to simplify integration with the Xero API.
 WebService::Xero modules primarily encapsulate the [OAuth (v1.0a) access control protocol as described by Cubrid](http://www.cubrid.org/blog/dev-platform/dancing-with-oauth-understanding-how-authorization-works/) .
 
 
@@ -123,18 +122,8 @@ make install
 
 ## Usage
 
-An example of a basic agent accessing a private Xero Application.
-````perl
-#!/usr/bin/perl
-use strict;
-use warnings;
-use WebService::Xero::Agent::PrivateApplication;
-use Data::Dumper;
+TODO 
 
-my $xero = WebService::Xero::Agent::PrivateApplication->new( CONSUMER_KEY    => 'YOUR_OAUTH_CONSUMER_KEY', 
-                                                    CONSUMER_SECRET => 'YOUR_OAUTH_CONSUMER_SECRET', 
-                                                    PRIVATE_KEY      => '-----BEGIN RSA PRIVATE KEY-----.....etc'
-                                                          );
 ## AND THEN ACCESS THE XERO API POINTS
 
 my $contact_struct = $xero->do_xero_api_call( 'https://api.xero.com/api.xro/2.0/Contacts' );
@@ -150,7 +139,6 @@ See perldoc for details
 ````sh
 perldoc WebService::Xero
 perldoc WebService::Xero::Agent::PublicApplication
-perldoc WebService::Xero::Agent::PrivateApplication
 perldoc WebService::Xero::Contact
 perldoc WebService::Xero::Contacts_Container
 ````

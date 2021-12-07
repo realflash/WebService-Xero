@@ -31,18 +31,12 @@ Object to describe an Item record as specified by Xero API and the associated DT
 L<https://github.com/XeroAPI/XeroAPI-Schemas/blob/master/src/main/resources/XeroSchemas/v2.00/Item.xsd>.
 
 Mostly a wrapper for Xero Item data structure.
-    use WebService::Xero::Agent::PrivateApplication;
+    use WebService::Xero::Agent::PublicApplication;
     use WebService::Xero::Item;
     use JSON;
     use JSON::XS;
 
-    my $xero_agent = WebService::Xero::Agent::PrivateApplication->new( 
-                                                            NAME            => $config->{PRIVATE_APPLICATION}{NAME},
-                                                            CONSUMER_KEY    => $config->{PRIVATE_APPLICATION}{CONSUMER_KEY}, 
-                                                            CONSUMER_SECRET => $config->{PRIVATE_APPLICATION}{CONSUMER_SECRET}, 
-                                                            # KEYFILE         => $config->{PRIVATE_APPLICATION}{KEYFILE},
-                                                            PRIVATE_KEY     => $pk_text,
-                                                            );
+	TODO
 
     my $TRUE  = bless( do{\(my $o = 1)}, 'JSON::PP::Boolean' );
     my $FALSE = bless( do{\(my $o = 0)}, 'JSON::PP::Boolean' );

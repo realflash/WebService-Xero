@@ -46,20 +46,20 @@ Also provide a few helper functions such as get_all_using_agent() which includes
 
 =head2 Example 1
 
-    use WebService::Xero::Agent::PrivateApplication;
+    use WebService::Xero::Agent::PublicApplication;
     use  WebService::Xero::Contact;
 
-    my $agent            = WebService::Xero::Agent::PrivateApplication->new( ... etc 
+	TODO
     my $contact_response = $agent->do_xero_api_call( 'https://api.xero.com/api.xro/2.0/Contacts/297c2dc5-cc47-4afd-8ec8-74990b8761e9' ) || die( 'check the agent for error message' );
 
     my $contact =  WebService::Xero::Contact->new( %{$contact_response->{Contacts}[0]} );
     print $contact->as_text();
 
 =head2 Example 2
-    use WebService::Xero::Agent::PrivateApplication;
+    use WebService::Xero::Agent::PublicApplication;
     use  WebService::Xero::Contact;
-    my $agent            = WebService::Xero::Agent::PrivateApplication->new( ... etc     
 
+	TODO
     my $contact_list = WebService::Xero::Contact->get_all_using_agent( agent=> $agent ); 
     foreach my $contact ( @$contact_list )
     {
