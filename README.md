@@ -179,7 +179,6 @@ make test TEST_VERBOSE=1
 * Simplify this README - TLDNR
 * Classes for all Xero Components ( Item, Contact, Invoice etc )
 * Working Public Application Example 
-* Partner Application Interface
 
 LICENSE AND COPYRIGHT
 ----
