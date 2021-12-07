@@ -1,6 +1,5 @@
 # WebService::Xero
 
-
 [![Build Status](https://travis-ci.org/pscott-au/CCP-Xero.svg?branch=master)](https://travis-ci.org/pscott-au/CCP-Xero)
 [![Coverage Status](https://coveralls.io/repos/github/pscott-au/CCP-Xero/badge.svg?branch=master)](https://coveralls.io/github/pscott-au/CCP-Xero?branch=master)
 [![CPAN Version](https://img.shields.io/cpan/v/WebService-Xero.svg)](http://search.cpan.org/~localshop/WebService-Xero/lib/WebService/Xero.pm)
@@ -115,22 +114,10 @@ NB: Crypt::OpenSSL::RSA from CPAN requires SSL devel libraries which
   yum install openssl-devel    ## for RH,Centos, Ubuntu etc
 ```
 
-Set ENV vars if you require verbose testing.
-````sh
-export   RELEASE_TESTING=1
-export   AUTHOR_TESTING=1
-
-````
-NB: you can also copy the template config file in t/config/test_config.tpl to t/config/test_config.ini to use API credentials in your testing 
-
-
-Make,test and install the library
+Make,test and install the library. Most tests will not be run by default, as setting up a Xero application with OAuth keys etc. is required. For more information on runnning the full set of tests, see the Development section.
 ```sh
 make
 make test
-## or for verbose test
-make test TEST_VERBOSE=1
-
 make install
 ```
 
@@ -167,14 +154,44 @@ perldoc WebService::Xero::Agent::PrivateApplication
 perldoc WebService::Xero::Contact
 perldoc WebService::Xero::Contacts_Container
 ````
+# Development
+
+## Running the full test suite
+To run all of the tests, do the following:
+
+* [Log in to Xero developer](https://developer.xero.com/app/manage), creating an account as necessary
+* Click the **New app** button in the top right-hand corner
+* Set **Name** to *WebService::Zero* (can't have Zero in the name)
+* Set the **Integration type** to **Web app**
+* Set the **Company or application URL** to whatever you like
+* Set the **Redirect URI** to *http://localhost:8082/callback*
+* Click **Create app** at the bottom
+* Once the app is created, click **Configuration** on the left-hand side.
+* Copy the Client id and set it in TODO
+* Click **Generate a secret** and then set it in TODO
+* Run ./xero-token-init
+* Select **Demo Company (UK)** at the top
+* Click **Allow access for 30 minutes** TODO check this is the same when offline is requested.
+
+Tokens are now saved in TODO. 
+
+Set ENV vars if you require verbose testing.
+````sh
+export   RELEASE_TESTING=1
+export   AUTHOR_TESTING=1
+
+````
+NB: you can also copy the template config file in t/config/test_config.tpl to t/config/test_config.ini to use API credentials in your testing 
+
+For verbose test
+make test TEST_VERBOSE=1
 
 
-
-### To-do's
- - Simplify this README - TLDNR
- - Classes for all Xero Components ( Item, Contact, Invoice etc )
- - Working Public Application Example 
- - Partner Application Interface
+### To-dos
+* Simplify this README - TLDNR
+* Classes for all Xero Components ( Item, Contact, Invoice etc )
+* Working Public Application Example 
+* Partner Application Interface
 
 LICENSE AND COPYRIGHT
 ----
