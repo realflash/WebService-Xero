@@ -4,7 +4,7 @@ package WebService::Xero::Agent::PublicApplication;
 use 5.006;
 use strict;
 use warnings;
-use base ('WebService::Xero::Agent');
+use parent ('WebService::Xero::Agent');
 
 use Crypt::OpenSSL::RSA;
 use Digest::MD5 qw( md5_base64 );
