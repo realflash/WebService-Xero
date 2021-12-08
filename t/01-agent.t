@@ -12,9 +12,6 @@ use Config::Tiny;
 
 BEGIN {
 	use_ok( 'WebService::Xero::Agent' ) || print "Bail out!\n";
-	use_ok( 'WebService::Xero::Contact' ) || print "Bail out!\n";
-	use_ok( 'WebService::Xero::Invoice' ) || print "Bail out!\n";
-	use_ok( 'WebService::Xero::Item' ) || print "Bail out!\n";
 
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
