@@ -8,10 +8,7 @@ use Crypt::OpenSSL::RSA;
 use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
 
-#plan tests => 17; # instead of noplan using  done_testing;
-
 use Config::Tiny;
-
 
 BEGIN {
 	use_ok( 'WebService::Xero::Agent' ) || print "Bail out!\n";
