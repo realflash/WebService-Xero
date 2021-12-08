@@ -48,14 +48,10 @@ BEGIN {
 		SKIP: {
 			skip("no Private API config") unless (-e $config->{PRIVATE_APPLICATION}{KEYFILE} );
 			#ok( $config->{PUBLIC_APPLICATION}{CLIENT_ID} ne 'YOUR_OAUTH_CLIENT_ID', 'Private API Consumer key not left as default' );
-			ok ( my $pk_text = read_file( $config->{PRIVATE_APPLICATION}{KEYFILE} ), 'load private key file');
-			ok ( my $pko = Crypt::OpenSSL::RSA->new_private_key( $pk_text ), 'Generate RSA Object from private key file' );
 			ok ( my $xero = WebService::Xero::Agent::PublicApplication->new( 
 													  NAME			=> $config->{PRIVATE_APPLICATION}{NAME},
 													  CLIENT_ID	=> $config->{PRIVATE_APPLICATION}{CLIENT_ID}, 
 													  CLIENT_SECRET => $config->{PRIVATE_APPLICATION}{CLIENT_SECRET}, 
-													 # KEYFILE		 => $config->{PRIVATE_APPLICATION}{KEYFILE},
-													  PRIVATE_KEY	 => $pk_text,
 													  ), 'New Xero Private Application Agent' );
 			note( $xero->as_text() );
 

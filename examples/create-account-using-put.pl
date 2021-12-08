@@ -5,7 +5,6 @@ use warnings;
 
 use Config::Tiny;
 use WebService::Xero::Agent::TODO;
-use Crypt::OpenSSL::RSA;
 use Data::Dumper;
 use File::Slurp; ## readfile
 use DateTime;
@@ -24,15 +23,10 @@ create-account-using-put.pl
 
 die('Configuration is assumed to be defined in the ./t/config/test_config.ini file - copy the template file in the same directory and modify with references to your Private Application API keys and secret') unless -e '../t/config/test_config.ini';
 my $config =  Config::Tiny->read( '../t/config/test_config.ini') || die('failed to load config');
-my $pk_text = read_file( $config->{PRIVATE_APPLICATION}{KEYFILE} );
-my $pko = Crypt::OpenSSL::RSA->new_private_key( $pk_text ); # 'Generate RSA Object from private key file'
-
 my $xero = WebService::Xero::Agent::PrivateApplication->new( 
                                                           NAME            => $config->{PRIVATE_APPLICATION}{NAME},
                                                           CLIENT_ID    => $config->{PRIVATE_APPLICATION}{CLIENT_ID}, 
                                                           CLIENT_SECRET => $config->{PRIVATE_APPLICATION}{CLIENT_SECRET}, 
-                                                         # KEYFILE         => $config->{PRIVATE_APPLICATION}{KEYFILE},
-                                                          PRIVATE_KEY     => $pk_text,
                                                           );
 
 
