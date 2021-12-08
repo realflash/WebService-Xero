@@ -12,11 +12,19 @@ use URI::Encode qw(uri_encode uri_decode );
 use Config::Tiny;
 
 BEGIN {
-	# Test with no parameters
-	is( WebService::Xero::Agent::PublicApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
+	my $xero;
+
+	# Test bad parameters
+	# Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
+	# Client secret should be 48 chars long
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(); }, qr/No client ID specified/, "Handled no client creds at all 1") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => undef); }, qr/No client ID specified/, "Handled no client creds at all 2") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP"); }, qr/No client ID specified/, "Handled no client ID") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => undef); }, qr/No client ID specified/, "Handled no client ID") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client ID too short/, "Handled short client ID") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client secret too short/, "Handled short secret ID") or note($@);
 
 	## Test a valid although unusable configuration
-	my $xero;
 	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 														  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP')}, "Correct parameters don't throw exception" );
 	is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
