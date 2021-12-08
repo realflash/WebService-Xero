@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Test::More;
+use Test::More 0.98;
 
 # plan tests => 4; # instead of noplan using  done_testing;
 
