@@ -7,7 +7,7 @@ use Test::More 0.98;
 use Test2::Tools::Exception qw/dies lives/;
 use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
-
+use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
 
 BEGIN {
@@ -19,7 +19,7 @@ BEGIN {
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(); }, qr/No client ID specified/, "Handled no client creds at all 1") or note($@);
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => undef); }, qr/No client ID specified/, "Handled no client creds at all 2") or note($@);
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP"); }, qr/No client ID specified/, "Handled no client ID") or note($@);
-	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => undef); }, qr/No client ID specified/, "Handled no client ID") or note($@);
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => undef); }, qr/No client secret specified/, "Handled no client ID") or note($@);
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client ID too short/, "Handled short client ID") or note($@);
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client secret too short/, "Handled short secret ID") or note($@);
 
@@ -27,8 +27,6 @@ BEGIN {
 	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 														  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP')}, "Correct parameters don't throw exception" );
 	is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
-
-	like ( $xero->as_text(), qr/WebService::Xero::Agent::PublicApplication/, 'as_text()' );
 
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
