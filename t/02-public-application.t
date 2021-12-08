@@ -11,8 +11,6 @@ use URI::Encode qw(uri_encode uri_decode );
 use Config::Tiny;
 
 BEGIN {
-	use_ok( 'WebService::Xero::Agent::PublicApplication' ) || print "Bail out!\n";
-
 	# as_text
 	is( WebService::Xero::Agent::PublicApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
 
