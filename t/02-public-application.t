@@ -29,8 +29,8 @@ BEGIN {
 	is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
 	SKIP: {
-		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
-		note(" --- Full Agent tests - loading config ./t/config/test_config.ini");
+		skip ("active agent tests; no config found in ./t/config/test_config.ini") unless -e './t/config/test_config.ini' ;
+		note(" --- Running Agent tests - loading config ./t/config/test_config.ini");
 
 		## VALIDATE CONFIGURATION FILE
 		ok( my $config =  Config::Tiny->read( './t/config/test_config.ini' ) , 'Load Config defined at ./t/config/test_config.ini }' );
