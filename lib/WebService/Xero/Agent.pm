@@ -62,7 +62,6 @@ sub new
       NAME           => $params{NAME} || 'Unnamed Application',
       CLIENT_ID   => $params{CLIENT_ID} || '',
       CLIENT_SECRET => $params{CLIENT_SECRET} || "",
-      keystring       => $params{keystring} || undef,
       internal_client_id    => $params{internal_client_id}    || "",
       internal_token           => $params{internal_token}           || "",
       internal_token_secret    => $params{internal_token_secret}    || "",  
