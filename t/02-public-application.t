@@ -5,7 +5,6 @@ use warnings;
 use Data::Dumper;
 use Test::More 0.98;
 use Test2::Tools::Exception qw/dies lives/;
-use Crypt::OpenSSL::RSA;
 use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
 

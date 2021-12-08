@@ -22,7 +22,6 @@ WriteMakefile(
     },
     PREREQ_PM => {
         'Config::Tiny'        => 0,
-        'Crypt::OpenSSL::RSA' => 0,
         'File::Slurp'         => 0,
         'XML::Simple'         => 0,
         'Digest::MD5'         => 0,
