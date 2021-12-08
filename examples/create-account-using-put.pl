@@ -29,7 +29,7 @@ my $pko = Crypt::OpenSSL::RSA->new_private_key( $pk_text ); # 'Generate RSA Obje
 
 my $xero = WebService::Xero::Agent::PrivateApplication->new( 
                                                           NAME            => $config->{PRIVATE_APPLICATION}{NAME},
-                                                          CONSUMER_KEY    => $config->{PRIVATE_APPLICATION}{CONSUMER_KEY}, 
+                                                          CLIENT_ID    => $config->{PRIVATE_APPLICATION}{CLIENT_ID}, 
                                                           CONSUMER_SECRET => $config->{PRIVATE_APPLICATION}{CONSUMER_SECRET}, 
                                                          # KEYFILE         => $config->{PRIVATE_APPLICATION}{KEYFILE},
                                                           PRIVATE_KEY     => $pk_text,

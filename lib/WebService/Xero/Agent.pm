@@ -60,11 +60,11 @@ sub new
     my $self = bless 
     {
       NAME           => $params{NAME} || 'Unnamed Application',
-      CONSUMER_KEY   => $params{CONSUMER_KEY} || '',
+      CLIENT_ID   => $params{CLIENT_ID} || '',
       CONSUMER_SECRET => $params{CONSUMER_SECRET} || "",
       PRIVATE_KEY     => $params{PRIVATE_KEY} || '',
       keystring       => $params{keystring} || undef,
-      internal_consumer_key    => $params{internal_consumer_key}    || "",
+      internal_client_id    => $params{internal_client_id}    || "",
       internal_token           => $params{internal_token}           || "",
       internal_token_secret    => $params{internal_token_secret}    || "",  
       pko             => $params{pko} || undef,
@@ -163,12 +163,12 @@ sub do_xero_put_call
   my ( $self, $uri, $method, $xml ) = @_;
 
   my $encryption = 'RSA-SHA1';
-  $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CONSUMER_KEY} ); 
-  $self->{TOKEN}        = $self->{CONSUMER_KEY}    unless  $self->{TOKEN};
+  $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CLIENT_ID} ); 
+  $self->{TOKEN}        = $self->{CLIENT_ID}    unless  $self->{TOKEN};
   $self->{TOKEN_SECRET} = $self->{CONSUMER_SECRET} unless  $self->{TOKEN_SECRET};
 
 my $access = Net::OAuth->request("protected resource")->new(
-    consumer_key     => $self->{CONSUMER_KEY},
+    client_id     => $self->{CLIENT_ID},
     consumer_secret  => $self->{CONSUMER_SECRET},
     token            => $self->{TOKEN},
     token_secret     => $self->{TOKEN_SECRET},
@@ -178,7 +178,7 @@ my $access = Net::OAuth->request("protected resource")->new(
     timestamp        => time,
     nonce => 'ccp' . md5_base64( join('', rand_chars(size => 8, set => 'alphanumeric')) . time ), 
 );
-  if ( $self->{TOKEN} eq $self->{CONSUMER_KEY} ) 
+  if ( $self->{TOKEN} eq $self->{CLIENT_ID} ) 
   {
     $access->sign( $self->{pko} );
   }
@@ -218,12 +218,12 @@ sub do_xero_api_call
 
   my $data = undef;
   my $encryption = 'RSA-SHA1';
-  $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CONSUMER_KEY} ); 
-  $self->{TOKEN}        = $self->{CONSUMER_KEY}    unless  $self->{TOKEN};
+  $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CLIENT_ID} ); 
+  $self->{TOKEN}        = $self->{CLIENT_ID}    unless  $self->{TOKEN};
   $self->{TOKEN_SECRET} = $self->{CONSUMER_SECRET} unless  $self->{TOKEN_SECRET};
 
   my %opts = (
-    consumer_key     => $self->{CONSUMER_KEY},
+    client_id     => $self->{CLIENT_ID},
     consumer_secret  => $self->{CONSUMER_SECRET},
     token            => $self->{TOKEN},
     token_secret     => $self->{TOKEN_SECRET},
@@ -239,7 +239,7 @@ sub do_xero_api_call
 
   my $access = Net::OAuth->request("protected resource")->new( %opts );
   
-  if ( $self->{TOKEN} eq $self->{CONSUMER_KEY} ) 
+  if ( $self->{TOKEN} eq $self->{CLIENT_ID} ) 
   {
     $access->sign( $self->{pko} );
   }
@@ -308,7 +308,7 @@ sub do_xero_api_call
 sub api_error
 {
   my ( $self, $msg ) = @_;
-  #return $self->_error("SERVER ERROR: CONSUMER_KEY was not recognised - check your credentials") if ( $msg eq 'oauth_problem=consumer_key_unknown&oauth_problem_advice=Consumer%20key%20was%20not%20recognised');
+  #return $self->_error("SERVER ERROR: CLIENT_ID was not recognised - check your credentials") if ( $msg eq 'oauth_problem=client_id_unknown&oauth_problem_advice=Consumer%20key%20was%20not%20recognised');
   return $self->_error("UNRECOGNISED API ERROR '$msg'");
 }
 
@@ -346,7 +346,7 @@ sub _error
 sub as_text
 {
   my ( $self ) = @_;
-  return qq{    NAME              => $self->{NAME}\nCONSUMER_KEY      => $self->{CONSUMER_KEY}\nCONSUMER_SECRET   => $self->{CONSUMER_SECRET} \n};
+  return qq{    NAME              => $self->{NAME}\nCLIENT_ID      => $self->{CLIENT_ID}\nCONSUMER_SECRET   => $self->{CONSUMER_SECRET} \n};
 }
 
 =head2 get_status

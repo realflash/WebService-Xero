@@ -84,7 +84,7 @@ sub get_request_token ## FOR PUBLIC APP (from old Xero::get_auth_token)
    'version' => '1.0',
    'request_url' => 'https://api.xero.com/oauth/RequestToken?oauth_callback=' . uri_encode( $my_callback_url ),
     callback =>  $my_callback_url,
-    consumer_key     => $self->{CONSUMER_KEY},
+    client_id     => $self->{CLIENT_ID},
     consumer_secret  => $self->{CONSUMER_SECRET},
     request_method   => 'GET',
     signature_method => 'HMAC-SHA1',
@@ -153,7 +153,7 @@ sub get_access_token  ## FOR PUBLIC APP
 
     my $uri = "https://api.xero.com/oauth/AccessToken";
     my $access = Net::OAuth->request("access token")->new(
-      consumer_key     => $self->{CONSUMER_KEY},
+      client_id     => $self->{CLIENT_ID},
       consumer_secret  => $self->{CONSUMER_SECRET}, 
       token_secret            => $stored_token_secret,  ## persistently stored session token 
       token                   => $stored_token,         ## persistently stored session token 
@@ -242,7 +242,7 @@ Access Token      A value that contains a key for the Consumer to access the res
 
     use WebService::Xero::Agent::PublicApplication;
 
-    my $xero = WebService::Xero::Agent::PublicApplication->new( CONSUMER_KEY    => 'YOUR_OAUTH_CONSUMER_KEY', 
+    my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', 
                                                           CONSUMER_SECRET => 'YOUR_OAUTH_CONSUMER_SECRET', 
                                                           CALLBACK_URL    => 'http://localhost/xero_tester.cgi'
                                                           );
