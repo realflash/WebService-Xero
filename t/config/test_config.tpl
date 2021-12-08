@@ -12,6 +12,6 @@
 #
 
 [PUBLIC_APPLICATION]
-# NAME            = 
-# CLIENT_ID 	  = 
-# CLIENT_SECRET   = 
+NAME			= 
+CLIENT_ID		= 
+CLIENT_SECRET	= 
