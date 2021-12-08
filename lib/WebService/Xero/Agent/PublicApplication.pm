@@ -6,7 +6,6 @@ use strict;
 use warnings;
 use parent ('WebService::Xero::Agent');
 
-use Crypt::OpenSSL::RSA;
 use Digest::MD5 qw( md5_base64 );
 
 use URI::Encode qw(uri_encode uri_decode );
