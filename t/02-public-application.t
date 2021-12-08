@@ -21,8 +21,6 @@ BEGIN {
 
 	like ( $xero->as_text(), qr/WebService::Xero::Agent::PublicApplication/, 'as_text()' );
 
-	is( $xero->get_all_xero_products_from_xero(), undef, "attempt to get from xero fails with invalid credentials" );
-
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
 		note(" --- Full Agent tests - loading config ./t/config/test_config.ini");

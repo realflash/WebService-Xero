@@ -91,6 +91,8 @@ BEGIN {
     is( ref($item_obj), 'WebService::Xero::Item', 'created WebService::Xero::Organisation object is the right type' );
     like( $item_obj->as_text(), qr/Item as_text/, 'WebService::Xero::Item->as_text()' );
     ok( $item_obj->new_from_api_data(), 'WebService::Xero::Item->new_from_api_data()' );
+	is( $xero->get_all_xero_products_from_xero(), undef, "attempt to get from xero fails with invalid credentials" );
+
 
 
     use_ok( 'WebService::Xero::Invoice' ) || print "Bail out!\n";
