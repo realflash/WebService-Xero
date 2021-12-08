@@ -24,7 +24,7 @@ BEGIN {
 	ok( 1==1, 'New WebService::Xero::Agent');
 
 	SKIP: {
-		skip ("no config found in ./t/config/test_config.ini - skipping agent tests", 10) unless -e './t/config/test_config.ini' ;
+		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
 		note(" --- Full Agent tests - loading config ./t/config/test_config.ini");
 		#ok( -e $ENV{XERO_TEST_CONFIG} , 'config file exists' );
 		#ok( -e $ENV{XERO_TEST_CONFIG} , 'config file exists' );
