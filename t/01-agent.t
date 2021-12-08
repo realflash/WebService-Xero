@@ -26,8 +26,7 @@ BEGIN {
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
 		note(" --- Full Agent tests - loading config ./t/config/test_config.ini");
-		#ok( -e $ENV{XERO_TEST_CONFIG} , 'config file exists' );
-		#ok( -e $ENV{XERO_TEST_CONFIG} , 'config file exists' );
+
 		## VALIDATE CONFIGURATION FILE
 		ok( my $config =  Config::Tiny->read( './t/config/test_config.ini' ) , 'Load Config defined at ./t/config/test_config.ini }' );
 
