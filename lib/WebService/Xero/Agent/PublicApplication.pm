@@ -11,7 +11,7 @@ use Digest::MD5 qw( md5_base64 );
 
 use URI::Encode qw(uri_encode uri_decode );
 use Data::Random qw( rand_chars );
-use Net::OAuth 0.20;
+use Net::OAuth2 0.67;
 $Net::OAuth::PROTOCOL_VERSION = Net::OAuth::PROTOCOL_VERSION_1_0A;
 
 =head1 NAME

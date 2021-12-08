@@ -29,7 +29,7 @@ WriteMakefile(
         'HTTP::Request'       => 0,
         'JSON::XS'                => 0, ## not sure if need to include JSON::PP or JSON::PP here or build?
         'Data::Random'        => 0,
-        'Net::OAuth'          => 0,
+        'Net::OAuth2'          => 0,
         'Mozilla::CA'         => 0,
         'DateTime'            => 0,
         'LWP::Protocol::https' => 0,
