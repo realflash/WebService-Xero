@@ -29,15 +29,17 @@ is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero obje
 
 SKIP: {
 	skip ("active agent tests; no config found in ./t/config/test_config.ini") unless -e './t/config/test_config.ini' ;
-	note(" --- Running Agent tests - loading config ./t/config/test_config.ini");
+	note(" --- Running authentication tests - loading config ./t/config/test_config.ini");
 
 	## VALIDATE CONFIGURATION FILE
 	ok( my $config =  Config::Tiny->read( './t/config/test_config.ini' ) , 'Load Config defined at ./t/config/test_config.ini }' );
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}), "Config file has an ID in it");
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
 
 	TODO: {
 		todo_skip('not implemented',1);
 
-		## SKIP PUBLIC APPLICATION UNLESS VALID KEY FILE PROVIDED IN CONFIG
+		## SKIP AUTHENTICATION TESTS UNLESS VALID KEY FILE PROVIDED IN CONFIG
 		diag(' --- SKIPPING PRIVATE API CONFIG - KEYFILE NOT FOUND') unless (-e $config->{PRIVATE_APPLICATION}{KEYFILE} );
 		SKIP: {
 			skip("no Private API config") unless (-e $config->{PRIVATE_APPLICATION}{KEYFILE} );
