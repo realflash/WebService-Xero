@@ -17,8 +17,8 @@ BEGIN {
 
 	## Test a valid although unusable configuration
 	my $xero;
-	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> 'CKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCK', 
-														  CLIENT_SECRET => 'CSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCS')}, "Correct parameters don't throw exception" );
+	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
+														  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP')}, "Correct parameters don't throw exception" );
 	is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
 	like ( $xero->as_text(), qr/WebService::Xero::Agent::PublicApplication/, 'as_text()' );
