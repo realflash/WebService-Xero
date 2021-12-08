@@ -16,6 +16,7 @@ WriteMakefile(
     },
     BUILD_REQUIRES => {
         'Test::More'   => 0.88,
+        'Test2::Tools::Exception' => 0,
         'Config::Tiny' => 0,
         'JSON'     => 0,
     },

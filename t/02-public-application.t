@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More 0.98;
+use Test2::Tools::Exception qw/dies lives/;
 use Crypt::OpenSSL::RSA;
 use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
@@ -15,8 +16,9 @@ BEGIN {
 	is( WebService::Xero::Agent::PublicApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
 
 	## Test a valid although unusable configuration
-	ok( my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> 'CKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCK', 
-														  CLIENT_SECRET => 'CSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCS') ,  'New Xero Private Application Agent' );
+	my $xero;
+	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> 'CKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCKCK', 
+														  CLIENT_SECRET => 'CSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCSCS')}, "Correct parameters don't throw exception" );
 	is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
 	like ( $xero->as_text(), qr/WebService::Xero::Agent::PublicApplication/, 'as_text()' );

@@ -6,6 +6,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Test::More 0.98;
+use Test2::Tools::Exception qw/dies lives/;
 use Crypt::OpenSSL::RSA;
 use JSON::PP; ## not sure if really need this
 use URI::Encode qw(uri_encode uri_decode );
