@@ -36,15 +36,14 @@ SKIP: {
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}), "Config file has an ID in it");
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
 
+	## Initialise with config file
+	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( 
+											  NAME			=> $config->{'PRIVATE_APPLICATION'}->{'NAME'},
+											  CLIENT_ID	=> $config->{'PRIVATE_APPLICATION'}->{'CLIENT_ID'}, 
+											  CLIENT_SECRET => $config->{'PRIVATE_APPLICATION'}->{'CLIENT_SECRET'}, 
+											  )}, 'Agent object initialises with correct parameters' ) or note($@);
 	TODO: {
-		todo_skip('not implemented',1);
-
-		ok ( my $xero = WebService::Xero::Agent::PublicApplication->new( 
-												  NAME			=> $config->{PRIVATE_APPLICATION}{NAME},
-												  CLIENT_ID	=> $config->{PRIVATE_APPLICATION}{CLIENT_ID}, 
-												  CLIENT_SECRET => $config->{PRIVATE_APPLICATION}{CLIENT_SECRET}, 
-												  ), 'New Xero Private Application Agent' );
-		note( $xero->as_text() );
+		todo_skip('stuff not re-implemented yet',1);
 
 		## TEST GET PRODUCTS
 		ok( my $products = $xero->get_all_xero_products_from_xero(), 'Get live products' );
