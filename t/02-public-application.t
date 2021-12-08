@@ -11,7 +11,7 @@ use URI::Encode qw(uri_encode uri_decode );
 use Config::Tiny;
 
 BEGIN {
-	# as_text
+	# Test with no parameters
 	is( WebService::Xero::Agent::PublicApplication->new() , undef, "attempt to create with invalid parameters failed as expected");
 
 	my $fake_key = '-----BEGIN RSA PRIVATE KEY-----
