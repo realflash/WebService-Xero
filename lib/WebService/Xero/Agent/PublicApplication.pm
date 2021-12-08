@@ -55,10 +55,14 @@ See L<https://app.xero.com/Application> for more detail.
 
 sub _validate_agent 
 {
-  my ( $self  ) = @_;
-  ## TODO: validate required WebService::Xero::Agent properties required for a public application.
+	my ( $self  ) = @_;
 
-  return $self;
+	unless($self->{CLIENT_ID}){ $self->_error("No client ID specified in constructor"); return $self; }
+	unless($self->{CLIENT_SECRET}) { $self->_error("No client secret specified in constructor"); return $self; }
+	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
+	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
+
+	return $self;
 }
 
 
