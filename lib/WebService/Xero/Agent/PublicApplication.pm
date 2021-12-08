@@ -85,7 +85,7 @@ sub get_request_token ## FOR PUBLIC APP (from old Xero::get_auth_token)
    'request_url' => 'https://api.xero.com/oauth/RequestToken?oauth_callback=' . uri_encode( $my_callback_url ),
     callback =>  $my_callback_url,
     client_id     => $self->{CLIENT_ID},
-    consumer_secret  => $self->{CONSUMER_SECRET},
+    client_secret  => $self->{CLIENT_SECRET},
     request_method   => 'GET',
     signature_method => 'HMAC-SHA1',
     timestamp        => time,
@@ -149,12 +149,12 @@ sub get_access_token  ## FOR PUBLIC APP
   if ( defined $stored_token_secret )
   {
 
-    my $new_oauth_token_secret = $self->{CONSUMER_SECRET} . '&' .$stored_token_secret;
+    my $new_oauth_token_secret = $self->{CLIENT_SECRET} . '&' .$stored_token_secret;
 
     my $uri = "https://api.xero.com/oauth/AccessToken";
     my $access = Net::OAuth->request("access token")->new(
       client_id     => $self->{CLIENT_ID},
-      consumer_secret  => $self->{CONSUMER_SECRET}, 
+      client_secret  => $self->{CLIENT_SECRET}, 
       token_secret            => $stored_token_secret,  ## persistently stored session token 
       token                   => $stored_token,         ## persistently stored session token 
       verifier         => $oauth_verifier,
@@ -243,7 +243,7 @@ Access Token      A value that contains a key for the Consumer to access the res
     use WebService::Xero::Agent::PublicApplication;
 
     my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', 
-                                                          CONSUMER_SECRET => 'YOUR_OAUTH_CONSUMER_SECRET', 
+                                                          CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET', 
                                                           CALLBACK_URL    => 'http://localhost/xero_tester.cgi'
                                                           );
     my $callback_url = 'http://localhost/cgi-bin/test_xero_public_application.cgi'; ## NB Domain must be configured in Xero App Config

@@ -61,7 +61,7 @@ sub new
     {
       NAME           => $params{NAME} || 'Unnamed Application',
       CLIENT_ID   => $params{CLIENT_ID} || '',
-      CONSUMER_SECRET => $params{CONSUMER_SECRET} || "",
+      CLIENT_SECRET => $params{CLIENT_SECRET} || "",
       PRIVATE_KEY     => $params{PRIVATE_KEY} || '',
       keystring       => $params{keystring} || undef,
       internal_client_id    => $params{internal_client_id}    || "",
@@ -165,11 +165,11 @@ sub do_xero_put_call
   my $encryption = 'RSA-SHA1';
   $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CLIENT_ID} ); 
   $self->{TOKEN}        = $self->{CLIENT_ID}    unless  $self->{TOKEN};
-  $self->{TOKEN_SECRET} = $self->{CONSUMER_SECRET} unless  $self->{TOKEN_SECRET};
+  $self->{TOKEN_SECRET} = $self->{CLIENT_SECRET} unless  $self->{TOKEN_SECRET};
 
 my $access = Net::OAuth->request("protected resource")->new(
     client_id     => $self->{CLIENT_ID},
-    consumer_secret  => $self->{CONSUMER_SECRET},
+    client_secret  => $self->{CLIENT_SECRET},
     token            => $self->{TOKEN},
     token_secret     => $self->{TOKEN_SECRET},
     request_url      => $uri,
@@ -220,11 +220,11 @@ sub do_xero_api_call
   my $encryption = 'RSA-SHA1';
   $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CLIENT_ID} ); 
   $self->{TOKEN}        = $self->{CLIENT_ID}    unless  $self->{TOKEN};
-  $self->{TOKEN_SECRET} = $self->{CONSUMER_SECRET} unless  $self->{TOKEN_SECRET};
+  $self->{TOKEN_SECRET} = $self->{CLIENT_SECRET} unless  $self->{TOKEN_SECRET};
 
   my %opts = (
     client_id     => $self->{CLIENT_ID},
-    consumer_secret  => $self->{CONSUMER_SECRET},
+    client_secret  => $self->{CLIENT_SECRET},
     token            => $self->{TOKEN},
     token_secret     => $self->{TOKEN_SECRET},
     request_url      => $uri,
@@ -346,7 +346,7 @@ sub _error
 sub as_text
 {
   my ( $self ) = @_;
-  return qq{    NAME              => $self->{NAME}\nCLIENT_ID      => $self->{CLIENT_ID}\nCONSUMER_SECRET   => $self->{CONSUMER_SECRET} \n};
+  return qq{    NAME              => $self->{NAME}\nCLIENT_ID      => $self->{CLIENT_ID}\nCLIENT_SECRET   => $self->{CLIENT_SECRET} \n};
 }
 
 =head2 get_status

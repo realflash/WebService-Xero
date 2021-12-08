@@ -13,5 +13,5 @@
 
 [PUBLIC_APPLICATION]
 # NAME            = 
-# CLIENT_ID    = 
-# CONSUMER_SECRET = 
+# CLIENT_ID 	  = 
+# CLIENT_SECRET   = 
