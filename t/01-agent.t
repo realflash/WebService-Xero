@@ -11,8 +11,6 @@ use URI::Encode qw(uri_encode uri_decode );
 use Config::Tiny;
 
 BEGIN {
-	use_ok( 'WebService::Xero::Agent' ) || print "Bail out!\n";
-
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
 		note(" --- Full Agent tests - loading config ./t/config/test_config.ini");
