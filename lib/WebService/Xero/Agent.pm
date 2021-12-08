@@ -329,7 +329,7 @@ sub api_account_organisation
 sub _error 
 {
   my ( $self, $msg ) = @_;
-  carp( $self->{_status} = $msg);
+  croak($self->{_status} = $msg);
   #$self->{_ERROR_VAL}; ##undef
   return undef;
 }
