@@ -15,10 +15,6 @@ BEGIN {
 	use_ok( 'WebService::Xero::Contact' ) || print "Bail out!\n";
 	use_ok( 'WebService::Xero::Invoice' ) || print "Bail out!\n";
 	use_ok( 'WebService::Xero::Item' ) || print "Bail out!\n";
-	use_ok( 'WebService::Xero::Agent::PublicApplication' ) || print "Bail out!\n";
-
-	#ok( my $xero = WebService::Xero::Agent->new(), 'New Xero::Agent');
-	ok( 1==1, 'New WebService::Xero::Agent');
 
 	SKIP: {
 		skip ("no config found in ./t/config/test_config.ini - skipping agent tests") unless -e './t/config/test_config.ini' ;
