@@ -10,6 +10,8 @@ use URI::Encode qw(uri_encode uri_decode );
 use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
 use Log::Log4perl qw(:easy);
+use URI;
+use Data::Validate::URI qw(is_uri);
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -43,7 +45,14 @@ SKIP: {
 											  NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
 											  CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
 											  CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'} 
-											  )} 'Agent object initialises with correct parameters';
+											  )} "Agent object initialises with correct parameters";
+											  
+	## Get a auth URL for the user to visit
+	try_ok {my $auth_url = $xero->get_auth_url();} "Authorisation URL method doesn't crash";
+	ok(defined($auth_url), "Auth URL is not undefined");
+	ok(is_uri($auth_url), "Auth URL is a valid URI");
+	ok(is_https_uri($auth_url), "Auth URL scheme is HTTPS");
+	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
 
