@@ -5,7 +5,8 @@ use 5.006;
 use strict;
 use warnings;
 use Carp;
-
+use Log::Log4perl;
+use Data::Dump qw(dump);
 use LWP::UserAgent;
 use HTTP::Request;
 use Mozilla::CA;
@@ -31,7 +32,7 @@ Version 0.13
 =cut
 
 our $VERSION = '0.13';
-
+my $_log = Log::Log4perl->get_logger("WebService::Xero::Agent");
 
 =head1 SYNOPSIS
 

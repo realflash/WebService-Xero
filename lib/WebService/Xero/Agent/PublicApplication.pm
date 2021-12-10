@@ -1,13 +1,12 @@
 package WebService::Xero::Agent::PublicApplication;
 
-
 use 5.006;
 use strict;
 use warnings;
 use parent ('WebService::Xero::Agent');
-
+use Log::Log4perl;
+use Data::Dump qw(dump);
 use Digest::MD5 qw( md5_base64 );
-
 use URI::Encode qw(uri_encode uri_decode );
 use Data::Random qw( rand_chars );
 use Net::OAuth2 0.67;
@@ -23,7 +22,7 @@ Version 0.13
 =cut
 
 our $VERSION = '0.13';
-
+my $_log = Log::Log4perl->get_logger("WebService::Xero::PublicApplication");
 
 =head1 SYNOPSIS
 
@@ -61,6 +60,7 @@ sub _validate_agent
 	unless($self->{CLIENT_SECRET}) { $self->_error("No client secret specified in constructor"); return $self; }
 	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
 	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
+	$_log->trace("Constructor got these params: ".dump(@_));
 
 	return $self;
 }

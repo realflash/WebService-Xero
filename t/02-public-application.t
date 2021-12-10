@@ -9,8 +9,10 @@ use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
 use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
+use Log::Log4perl qw(:easy);
 
 my $xero;
+Log::Log4perl->easy_init($TRACE);
 
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
