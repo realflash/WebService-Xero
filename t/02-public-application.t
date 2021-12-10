@@ -11,7 +11,7 @@ use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
 use Log::Log4perl qw(:easy);
 use URI;
-use Data::Validate::URI qw(is_uri);
+use Data::Validate::URI qw(is_uri is_https_uri);
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -48,7 +48,8 @@ SKIP: {
 											  )} "Agent object initialises with correct parameters";
 											  
 	## Get a auth URL for the user to visit
-	try_ok {my $auth_url = $xero->get_auth_url();} "Authorisation URL method doesn't crash";
+	my $auth_url;
+	try_ok {$auth_url = $xero->get_auth_url();} "Authorisation URL method doesn't crash";
 	ok(defined($auth_url), "Auth URL is not undefined");
 	ok(is_uri($auth_url), "Auth URL is a valid URI");
 	ok(is_https_uri($auth_url), "Auth URL scheme is HTTPS");

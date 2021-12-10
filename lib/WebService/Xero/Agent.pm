@@ -16,7 +16,7 @@ use XML::Simple;
 use Digest::MD5 qw( md5_base64 );
 use URI::Encode qw(uri_encode uri_decode );
 use Data::Random qw( rand_chars );
-use Net::OAuth2 0.67;
+use Net::OAuth2::Profile::WebServer 0.67;
 
 use WebService::Xero::Organisation;
 use XML::Simple;
@@ -69,14 +69,28 @@ sub new
       pko             => $params{pko} || undef,
       ua              => LWP::UserAgent->new(ssl_opts => { verify_hostname => 1 },),
       _status           => undef,
+      _oauth           => undef,
     }, $class;
-    return $self->_validate_agent(); ## derived classes to validate required properties
+    
+    $self->_validate_agent();	## derived classes to validate required properties
+								## This should have croaked if anything was wrong with our constructor params
+								
+	# Initialise OAuth object
+	$self->{_oauth} = Net::OAuth2::Profile::WebServer->new( name => 'Xero',
+														client_id => $self->{CLIENT_ID},
+														client_secret => $self->{CLIENT_SECRET},
+														scope => 'openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access',
+														authorize_url => 'https://login.xero.com/identity/connect/authorize',
+														access_token_url => 'https://identity.xero.com/connect/token',
+														refresh_token_url => 'https://identity.xero.com/connect/token');
+
+    return $self;
 }
 
 
 =head2 _validate_agent()
 
-  To be implemented in derived classes to validate the configuration of the agent.
+	To be implemented in derived classes to validate the configuration of the agent.
 
 =cut
 
@@ -86,10 +100,19 @@ sub _validate_agent
   return $self->_error('base class not meant for instantiation');
 }
 
+=head2 get_auth_url()
 
+	Retrieve the URL the user must go to to authenticate this app to one or more tenants.
 
+This URL will not visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO
 
+=cut
 
+sub get_auth_url
+{
+	my ( $self  ) = @_;
+	return $self->{_oauth}->authorize()->as_string();	# sic
+}
 
 =head2 get_all_xero_products_from_xero()
 
