@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Data::Dump qw(dump);
 use Test::More 0.98;
-use Test2::Tools::Exception qw/dies lives/;
+use Test2::Tools::Exception qw/dies lives try_ok/;
 use File::Slurp;
 use URI::Encode qw(uri_encode uri_decode );
 use WebService::Xero::Agent::PublicApplication;
@@ -39,11 +39,11 @@ SKIP: {
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
 
 	## Initialise with config file
-	try_ok({$xero = WebService::Xero::Agent::PublicApplication->new( 
-											  NAME			=> $config->{'PRIVATE_APPLICATION'}->{'NAME'},
-											  CLIENT_ID	=> $config->{'PRIVATE_APPLICATION'}->{'CLIENT_ID'}, 
-											  CLIENT_SECRET => $config->{'PRIVATE_APPLICATION'}->{'CLIENT_SECRET'}, 
-											  )}, 'Agent object initialises with correct parameters');
+	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
+											  NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
+											  CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
+											  CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'} 
+											  )} 'Agent object initialises with correct parameters';
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
 
