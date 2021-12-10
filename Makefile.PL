@@ -36,6 +36,7 @@ WriteMakefile(
         'LWP::Protocol::https'	=> 0,
         'Log::Log4perl'			=> 0,
         'Data::Dump'			=> 0,
+        'Data::Validate::URI'	=> 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'WebService-Xero-*' },

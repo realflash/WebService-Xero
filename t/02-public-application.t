@@ -11,7 +11,7 @@ use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
 use Log::Log4perl qw(:easy);
 use URI;
-use Data::Validate::URI qw(is_uri is_https_uri);
+use Data::Validate::URI qw(is_uri is_https_uri is_web_uri);
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -20,15 +20,43 @@ Log::Log4perl->easy_init($TRACE);
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
 # Client secret should be 48 chars long
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(); }, qr/No client ID specified/, "Handled no client creds at all 1") or note($@);
-like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => undef); }, qr/No client ID specified/, "Handled no client creds at all 2") or note($@);
-like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP"); }, qr/No client ID specified/, "Handled no client ID") or note($@);
-like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => undef); }, qr/No client secret specified/, "Handled no client ID") or note($@);
-like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client ID too short/, "Handled short client ID") or note($@);
-like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8", CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr"); }, qr/Client secret too short/, "Handled short secret ID") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, 
+																	CLIENT_SECRET => undef, 
+																	AUTH_CODE_URL => undef); },
+																	qr/No client ID specified/, "Handled no client creds at all 2") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef,
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/No client ID specified/, "Handled no client ID") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => undef,
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/No client secret specified/, "Handled no client secret") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																	AUTH_CODE_URL => undef); },
+																	qr/No auth code URL specified/, "Handled no auth code URL") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/Client ID too short/, "Handled short client ID") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/Client secret too short/, "Handled short secret ID") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	AUTH_CODE_URL => "notaURL"); },
+																	qr/Client secret too short/, "Auth code URL is not a valid URL") or note($@);
+
 
 ## Test a valid although unusable configuration
 ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
-													  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP')}, "Correct parameters don't throw exception" );
+													  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
+													  AUTH_CODE_URL => "https://127.0.0.1:3000")}, "Correct parameters don't throw exception, HTTPS" );
+ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
+													  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
+													  AUTH_CODE_URL => "http://127.0.0.1:3000")}, "Correct parameters don't throw exception, HTTP" );
 is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
 SKIP: {
@@ -44,7 +72,8 @@ SKIP: {
 	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
 											  NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
 											  CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
-											  CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'} 
+											  CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
+											  AUTH_CODE_URL => $config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'},
 											  )} "Agent object initialises with correct parameters";
 											  
 	## Get a auth URL for the user to visit
