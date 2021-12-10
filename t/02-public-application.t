@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Data::Dumper;
+use Data::Dump qw(dump);
 use Test::More 0.98;
 use Test2::Tools::Exception qw/dies lives/;
 use File::Slurp;
@@ -39,17 +39,17 @@ SKIP: {
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
 
 	## Initialise with config file
-	ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( 
+	try_ok({$xero = WebService::Xero::Agent::PublicApplication->new( 
 											  NAME			=> $config->{'PRIVATE_APPLICATION'}->{'NAME'},
 											  CLIENT_ID	=> $config->{'PRIVATE_APPLICATION'}->{'CLIENT_ID'}, 
 											  CLIENT_SECRET => $config->{'PRIVATE_APPLICATION'}->{'CLIENT_SECRET'}, 
-											  )}, 'Agent object initialises with correct parameters' ) or note($@);
+											  )}, 'Agent object initialises with correct parameters');
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
 
 		## TEST GET PRODUCTS
 		ok( my $products = $xero->get_all_xero_products_from_xero(), 'Get live products' );
-		note( Dumper $products );
+		note(dump($products));
 
 		## TEST GET ORAGNISATION DETAILS
 		ok( my $org = $xero->api_account_organisation(), 'Get API Owner Organisation Details' );
