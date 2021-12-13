@@ -72,6 +72,7 @@ sub new
       ua              => LWP::UserAgent->new(ssl_opts => { verify_hostname => 1 },),
       _status           => undef,
       _oauth           => undef,
+      _cache           => undef,
     }, $class;
     
     $self->_validate_agent();	## derived classes to validate required properties
@@ -90,15 +91,21 @@ sub new
 	# Check cache file is readable and writeable. Could well be come shenanigans here if run in a web server context
 	if(-e $self->{CACHE_FILE})
 	{
-		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable"); return $self; }
-		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable"); return $self; }
+		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable for file system access reasons"); return $self; }
+		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable for file system access reasons"); return $self; }
+		$self->{_cache} = Config::Tiny->read($self->{CACHE_FILE});
+		unless($self->{_cache})
+		{
+			$self->_error("Specified cache file exists and is corrupt: ".$self->{_cache}->errstr); return $self;
+		}	
+		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
 	}
 	else
-	{	# Create a config and save it now to see if it blows up
-		my $config = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
-		unless($config->write($self->{CACHE_FILE}))
-		{
-			$self->_error("Specified cache file doesn't exist and is not writeable: ".$config->errstr); return $self;
+	{	# Create a cache and save it now to see if it blows up
+		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
+		unless($self->{_cache}->write($self->{CACHE_FILE}))
+		{	# Write was attempted and went wrong somehow
+			$self->_error("Specified cache file doesn't exist and is not writeable: ".$self->{_cache}->errstr); return $self;
 		}
 	}
 
