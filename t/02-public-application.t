@@ -67,13 +67,13 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	CACHE_FILE => "/79347293474897/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/doesn't exist and is not writeable/, "Non-existent cache file is not writeable") or note($@);
+# Create cache file for testing
+my $tmp = File::Temp->new( TEMPLATE => 'WebService::Xero_test_XXXXX',
+					   DIR => '/tmp',
+					   SUFFIX => '.cache');
 SKIP: {
 	skip(" writeability tests as they only work on (Li|u)nix when not root") unless $^O =~ /linux/i && $> != 0;
 	
-	# Create unwriteable file for testing
-	my $tmp = File::Temp->new( TEMPLATE => 'WebService::Xero_test_XXXXX',
-						   DIR => '/tmp',
-						   SUFFIX => '.cache');
 	chmod 0444, $tmp->filename;
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																		CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
@@ -86,8 +86,17 @@ SKIP: {
 																		CACHE_FILE => $tmp->filename,
 																		AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																		qr/cache file exists and is not readable/, "Existent cache file is not readable") or note($@);
-	chmod 0000, $tmp->filename;
+	chmod 0666, $tmp->filename;
 }
+
+# Test a corrupted cache file
+print $tmp "LOADOFOLDCOBBLERS";
+close $tmp;
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																	CACHE_FILE => $tmp->filename,
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/corrupt/, "Corrupted cache file is detected") or note($@);
 
 ## Test a valid although unusable configuration
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
