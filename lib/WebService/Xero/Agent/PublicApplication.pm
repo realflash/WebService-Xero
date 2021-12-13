@@ -244,18 +244,16 @@ Access Token      A value that contains a key for the Consumer to access the res
 
 =head2 Authentication occurs in 3 steps (legs):
 
-=head3 Step 1 - Get an Unauthorised Request Token  
+=head3 Step 1 - Get an authorisation code
 
     use WebService::Xero::Agent::PublicApplication;
 
     my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', 
                                                           CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET', 
-                                                          CALLBACK_URL    => 'http://localhost/xero_tester.cgi'
+                                                          AUTH_CODE_URL    => 'http://localhost:3000'	# or a URL to some page you create in your existing web app
                                                           );
-    my $callback_url = 'http://localhost/cgi-bin/test_xero_public_application.cgi'; ## NB Domain must be configured in Xero App Config
-    $xero->get_request_token(  $callback_url ); ## This generates the token to include in the user redirect (A)
-    ## NB need to store $xero->{oauth_token},$xero->{oauth_token_secret} in persistent storage as will be required at later steps for this session.
-    print $xero->{login_url}; ## need to include a link to this URL in your app for the user to click on    (B)
+    my $url = $xero->get_auth_url(); 											# This retrieves the URL to give to the user to visit
+    print "Visit this URL to authorise this app to a Xero tenant: $url\n";		# or embed it in a web page somewhere, or send as a redirect
 
 =head3 Step 2 - Redirect User
 
