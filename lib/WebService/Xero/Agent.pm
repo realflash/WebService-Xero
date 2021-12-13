@@ -100,7 +100,7 @@ sub new
 		}
 		else
 		{
-			$self->{_cache}->{ _ => { WebService_Xero_version => $VERSION }};
+			$self->{_cache}->{_}->{WebService_Xero_version} = $VERSION;
 		}
 	}
 	else
