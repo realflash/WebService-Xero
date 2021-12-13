@@ -13,6 +13,7 @@ use Log::Log4perl qw(:easy);
 use URI;
 use URI::QueryParam;
 use Data::Validate::URI qw(is_uri is_https_uri is_web_uri);
+use File::Temp qw(tempfile);
 
 my $xero;
 Log::Log4perl->easy_init($DEBUG);
@@ -23,33 +24,63 @@ Log::Log4perl->easy_init($DEBUG);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(); }, qr/No client ID specified/, "Handled no client creds at all 1") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef, 
 																	CLIENT_SECRET => undef, 
+																	CACHE_FILE => undef, 
 																	AUTH_CODE_URL => undef); },
 																	qr/No client ID specified/, "Handled no client creds at all 2") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => undef,
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/No client ID specified/, "Handled no client ID") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																	CLIENT_SECRET => undef,
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/No client secret specified/, "Handled no client secret") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
-																	AUTH_CODE_URL => undef); },
+																	CACHE_FILE => undef,
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/No cache file specified/, "Handled no cache file") or note($@);
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/No auth code URL specified/, "Handled no auth code URL") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A",
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/Client ID too short/, "Handled short client ID") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/Client secret too short/, "Handled short secret ID") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "notaURL"); },
 																	qr/Client secret too short/, "Auth code URL is not a valid URL") or note($@);
-
+like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CACHE_FILE => "/79347293474897/WebServiceXero.cache",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	qr/Cache file is not readable/, "Cache file is not readable") or note($@);
+SKIP: {
+	skip(" writeability tests as they only work on (Li|u)nix when not root") unless $^O =~ /linux/i && $> != 0;
+	
+	# Create unwriteable file for testing
+	my $tmp = File::Temp->new( TEMPLATE => 'WebService::Xero_test_XXXXX',
+						   DIR => '/tmp',
+						   SUFFIX => '.cache');
+	chmod 0000, $tmp->filename;
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																		CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																		CACHE_FILE => $tmp->filename,
+																		AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																		qr/Cache file is not readable/, "Cache file is not writeable") or note($@);
+}
 
 ## Test a valid although unusable configuration
 ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
@@ -88,6 +119,9 @@ SKIP: {
 	is($auth_uri->query_param('client_id'), $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, "client_id is correctly defined");
 	is($auth_uri->query_param('response_type'), "code", "response_type is correctly defined");
 	is($auth_uri->query_param('scope'), "openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access", "scope is correctly defined");
+	
+	
+	
 	
 	#~ note("Auth URL is $auth_url");
 	
