@@ -11,10 +11,11 @@ use WebService::Xero::Agent::PublicApplication;
 use Config::Tiny;
 use Log::Log4perl qw(:easy);
 use URI;
+use URI::QueryParam;
 use Data::Validate::URI qw(is_uri is_https_uri is_web_uri);
 
 my $xero;
-Log::Log4perl->easy_init($TRACE);
+Log::Log4perl->easy_init($DEBUG);
 
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
@@ -82,7 +83,13 @@ SKIP: {
 	ok(defined($auth_url), "Auth URL is not undefined");
 	ok(is_uri($auth_url), "Auth URL is a valid URI");
 	ok(is_https_uri($auth_url), "Auth URL scheme is HTTPS");
-	note("Auth URL is $auth_url");
+	my $auth_uri = URI->new($auth_url);
+	is($auth_uri->query_param('redirect_uri'), $config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'}, "redirect_uri is correctly defined");
+	is($auth_uri->query_param('client_id'), $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, "client_id is correctly defined");
+	is($auth_uri->query_param('response_type'), "code", "response_type is correctly defined");
+	is($auth_uri->query_param('scope'), "openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access", "scope is correctly defined");
+	
+	#~ note("Auth URL is $auth_url");
 	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);

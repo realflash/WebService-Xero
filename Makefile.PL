@@ -20,6 +20,7 @@ WriteMakefile(
         'Config::Tiny' 				=> 0,
         'JSON'						=> 0,
         'Data::Validate::URI'		=> 0,
+        'URI::QueryParam'			=> 0,
     },
     PREREQ_PM => {
         'Config::Tiny'			=> 0,
