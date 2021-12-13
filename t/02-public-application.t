@@ -45,10 +45,10 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => "/tmp/WebServiceXero.cache",
-																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																	AUTH_CODE_URL => undef); },
 																	qr/No auth code URL specified/, "Handled no auth code URL") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A",
-																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
 																	qr/Client ID too short/, "Handled short client ID") or note($@);
@@ -56,17 +56,17 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
 																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
-																	qr/Client secret too short/, "Handled short secret ID") or note($@);
+																	qr/Client secret too short/, "Handled short client secret") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
-																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => "/tmp/WebServiceXero.cache",
 																	AUTH_CODE_URL => "notaURL"); },
-																	qr/Client secret too short/, "Auth code URL is not a valid URL") or note($@);
+																	qr/not a valid HTTP or HTTPS URL/, "Auth code URL is not a valid URL") or note($@);
 like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
-																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => "/79347293474897/WebServiceXero.cache",
 																	AUTH_CODE_URL => "http://127.0.0.1:3000"); },
-																	qr/Cache file is not readable/, "Cache file is not readable") or note($@);
+																	qr/doesn't exist and is not writeable/, "Non-existent cache file is not writeable") or note($@);
 SKIP: {
 	skip(" writeability tests as they only work on (Li|u)nix when not root") unless $^O =~ /linux/i && $> != 0;
 	
@@ -74,21 +74,30 @@ SKIP: {
 	my $tmp = File::Temp->new( TEMPLATE => 'WebService::Xero_test_XXXXX',
 						   DIR => '/tmp',
 						   SUFFIX => '.cache');
-	chmod 0000, $tmp->filename;
+	chmod 0444, $tmp->filename;
 	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
-																		CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2Vhqr",
+																		CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																		CACHE_FILE => $tmp->filename,
 																		AUTH_CODE_URL => "http://127.0.0.1:3000"); },
-																		qr/Cache file is not readable/, "Cache file is not writeable") or note($@);
+																		qr/cache file exists and is not writeable/, "Existent cache file is not writeable") or note($@);
+	chmod 0000, $tmp->filename;
+	like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID => "7CA8F60E5C7D479CA71EB7958F0B16A8",
+																		CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
+																		CACHE_FILE => $tmp->filename,
+																		AUTH_CODE_URL => "http://127.0.0.1:3000"); },
+																		qr/cache file exists and is not readable/, "Existent cache file is not readable") or note($@);
+	chmod 0000, $tmp->filename;
 }
 
 ## Test a valid although unusable configuration
-ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
-													  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
-													  AUTH_CODE_URL => "https://127.0.0.1:3000")}, "Correct parameters don't throw exception, HTTPS" );
-ok(lives {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
-													  CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
-													  AUTH_CODE_URL => "http://127.0.0.1:3000")}, "Correct parameters don't throw exception, HTTP" );
+try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
+																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
+																	AUTH_CODE_URL => "https://127.0.0.1:3000")} "Correct parameters don't throw exception, HTTPS";
+try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
+																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
+																	CACHE_FILE => "/tmp/WebServiceXero.cache",
+																	AUTH_CODE_URL => "http://127.0.0.1:3000")} "Correct parameters don't throw exception, HTTP";
 is( ref($xero), 'WebService::Xero::Agent::PublicApplication', 'created Xero object is the right type' );
 
 SKIP: {
@@ -102,10 +111,11 @@ SKIP: {
 
 	## Initialise with config file
 	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
-											  NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
-											  CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
-											  CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
-											  AUTH_CODE_URL => $config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'},
+													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
+													CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
+													CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
+													CACHE_FILE => "/tmp/WebServiceXero.cache",
+													AUTH_CODE_URL => $config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'},
 											  )} "Agent object initialises with correct parameters";
 											  
 	## Get a auth URL for the user to visit

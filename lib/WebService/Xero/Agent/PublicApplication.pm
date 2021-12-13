@@ -59,6 +59,7 @@ sub _validate_agent
 
 	unless($self->{CLIENT_ID}){ $self->_error("No client ID specified in constructor"); return $self; }
 	unless($self->{CLIENT_SECRET}) { $self->_error("No client secret specified in constructor"); return $self; }
+	unless($self->{CACHE_FILE}){ $self->_error("No cache file specified in constructor"); return $self; }
 	unless($self->{AUTH_CODE_URL}) { $self->_error("No auth code URL specified in constructor"); return $self; }
 	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
 	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
@@ -248,8 +249,9 @@ Access Token      A value that contains a key for the Consumer to access the res
 
     use WebService::Xero::Agent::PublicApplication;
 
-    my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', 
-                                                          CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET', 
+    my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', # Get this from Xero Developer site
+                                                          CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET',  # Get this from Xero Developer site
+                                                          CACHE_FILE => '/tmp/myapp.cache',				# Protect this as it will contain security tokens (but not your client creds)
                                                           AUTH_CODE_URL    => 'http://localhost:3000'	# or a URL to some page you create in your existing web app
                                                           );
     my $url = $xero->get_auth_url(); 											# This retrieves the URL to give to the user to visit

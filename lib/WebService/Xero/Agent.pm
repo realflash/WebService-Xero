@@ -63,6 +63,7 @@ sub new
       NAME           => $params{NAME} || 'Unnamed Application',
       CLIENT_ID   => $params{CLIENT_ID} || '',
       CLIENT_SECRET => $params{CLIENT_SECRET} || "",
+      CACHE_FILE => $params{CACHE_FILE} || "",
       AUTH_CODE_URL => $params{AUTH_CODE_URL} || "",
       internal_client_id    => $params{internal_client_id}    || "",
       internal_token           => $params{internal_token}           || "",
@@ -85,6 +86,17 @@ sub new
 														authorize_url => 'https://login.xero.com/identity/connect/authorize',
 														access_token_url => 'https://identity.xero.com/connect/token',
 														refresh_token_url => 'https://identity.xero.com/connect/token');
+
+	# Check cache file is readable and writeable
+	if(-e $self->{CACHE_FILE})
+	{
+		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable"); return $self; }
+		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable"); return $self; }
+	}
+	else
+	{
+		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file doesn't exist and is not writeable"); return $self; }
+	}
 
     return $self;
 }
