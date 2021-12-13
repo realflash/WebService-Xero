@@ -82,6 +82,7 @@ SKIP: {
 	ok(defined($auth_url), "Auth URL is not undefined");
 	ok(is_uri($auth_url), "Auth URL is a valid URI");
 	ok(is_https_uri($auth_url), "Auth URL scheme is HTTPS");
+	note("Auth URL is $auth_url");
 	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
