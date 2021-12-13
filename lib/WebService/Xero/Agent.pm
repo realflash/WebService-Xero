@@ -81,6 +81,7 @@ sub new
 														client_id => $self->{CLIENT_ID},
 														client_secret => $self->{CLIENT_SECRET},
 														scope => 'openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access',
+														redirect_uri => $self->{AUTH_CODE_URL},
 														authorize_url => 'https://login.xero.com/identity/connect/authorize',
 														access_token_url => 'https://identity.xero.com/connect/token',
 														refresh_token_url => 'https://identity.xero.com/connect/token');
