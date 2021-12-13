@@ -87,15 +87,19 @@ sub new
 														access_token_url => 'https://identity.xero.com/connect/token',
 														refresh_token_url => 'https://identity.xero.com/connect/token');
 
-	# Check cache file is readable and writeable
+	# Check cache file is readable and writeable. Could well be come shenanigans here if run in a web server context
 	if(-e $self->{CACHE_FILE})
 	{
 		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable"); return $self; }
 		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable"); return $self; }
 	}
 	else
-	{
-		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file doesn't exist and is not writeable"); return $self; }
+	{	# Create a config and save it now to see if it blows up
+		my $config = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
+		unless($config->write($self->{CACHE_FILE}))
+		{
+			$self->_error("Specified cache file doesn't exist and is not writeable: ".$config->errstr); return $self;
+		}
 	}
 
     return $self;
