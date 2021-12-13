@@ -252,7 +252,7 @@ Access Token      A value that contains a key for the Consumer to access the res
     my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', # Get this from Xero Developer site
                                                           CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET',  # Get this from Xero Developer site
                                                           CACHE_FILE => '/tmp/myapp.cache',				# Protect this as it will contain security tokens (but not your client creds)
-                                                          AUTH_CODE_URL    => 'http://localhost:3000'	# or a URL to some page you create in your existing web app
+                                                          AUTH_CODE_URL    => 'http://127.0.0.1:3000'	# or a URL to some page you create in your existing web app
                                                           );
     my $url = $xero->get_auth_url(); 											# This retrieves the URL to give to the user to visit
     print "Visit this URL to authorise this app to a Xero tenant: $url\n";		# or embed it in a web page somewhere, or send as a redirect
