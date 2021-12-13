@@ -96,16 +96,19 @@ sub new
 		$self->{_cache} = Config::Tiny->read($self->{CACHE_FILE});
 		unless($self->{_cache})
 		{
-			$self->_error("Specified cache file exists and is corrupt: ".$self->{_cache}->errstr); return $self;
-		}	
-		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
+			$self->_error("Specified cache file exists and is corrupt: ".Config::Tiny->errstr); return $self;
+		}
+		else
+		{
+			$self->{_cache}->{ _ => { WebService_Xero_version => $VERSION }};
+		}
 	}
 	else
 	{	# Create a cache and save it now to see if it blows up
 		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
 		unless($self->{_cache}->write($self->{CACHE_FILE}))
 		{	# Write was attempted and went wrong somehow
-			$self->_error("Specified cache file doesn't exist and is not writeable: ".$self->{_cache}->errstr); return $self;
+			$self->_error("Specified cache file doesn't exist and is not writeable: ".Config::Tiny->errstr); return $self;
 		}
 	}
 
