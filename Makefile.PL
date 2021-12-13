@@ -22,7 +22,7 @@ WriteMakefile(
         'Data::Validate::URI'		=> 0,
         'URI::QueryParam'			=> 0,
         'File::Temp'				=> 0,
-        'Test::HTTP::MockServer'			=> 0
+        'Test::Fake::HTTPD'			=> 0
     },
     PREREQ_PM => {
         'Config::Tiny'			=> 0,
