@@ -14,6 +14,7 @@ use URI;
 use URI::QueryParam;
 use Data::Validate::URI qw(is_uri is_https_uri is_web_uri);
 use File::Temp qw(tempfile);
+use Test::HTTP::MockServer;
 
 my $xero;
 Log::Log4perl->easy_init($DEBUG);
@@ -120,7 +121,7 @@ SKIP: {
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}), "Config file has an ID in it");
 	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
 
-	## Initialise with config file
+	# Initialise with config file
 	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
 													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
 													CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
@@ -129,7 +130,7 @@ SKIP: {
 													AUTH_CODE_URL => $config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'},
 											  )} "Agent object initialises with correct parameters";
 											  
-	## Get a auth URL for the user to visit
+	# Get an auth URL for the user to visit
 	my $auth_url;
 	try_ok {$auth_url = $xero->get_auth_url();} "Authorisation URL method doesn't crash";
 	ok(defined($auth_url), "Auth URL is not undefined");
@@ -141,8 +142,30 @@ SKIP: {
 	is($auth_uri->query_param('response_type'), "code", "response_type is correctly defined");
 	is($auth_uri->query_param('scope'), "openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access", "scope is correctly defined");
 	
-	
-	
+	# Get an access token
+	if($xero->{_cache}->{_}->{access_token})
+	{
+		note("Found an existing access token. Attempting to use or referesh it");
+	}
+	else
+	{
+		note("No existing access token. Starting temp web server for authorisation");
+		my $server = Test::HTTP::MockServer->new();
+		try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
+													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
+													CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
+													CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
+													CACHE_FILE => $cache_file,
+													AUTH_CODE_URL => $server->url_base(),
+											  )} "Agent object initialises with temp web server";
+		my $handle_request_phase1 = sub {
+			my ($request, $response) = @_;
+			note(dump($request));
+		};
+		$server->start_mock_server($handle_request_phase1);
+		note("Web server running. Go to ".$xero->get_auth_url()." to authorise this testing code to access a Xero tenant");
+		$server->stop_mock_server();
+	}
 	
 	#~ note("Auth URL is $auth_url");
 	
