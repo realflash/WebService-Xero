@@ -19,7 +19,7 @@ use Async;
 use Storable qw(thaw);
 
 my $xero;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($TRACE);
 my $cache_file = '/tmp/WebServiceXero.cache';
 
 # Test bad parameters
@@ -170,14 +170,19 @@ SKIP: {
 		note("Web server running ready to receive authorisation grant from Xero. Go to this link below to authorise this testing code to access a Xero tenant, using THIS COMPUTER. I'll wait up to five minutes for you.");
 		note($xero->get_auth_url());
 
-		# wait until the request comes in or it times out
+		# Wait until the request comes in or it times out
 		my $result = $proc->result('force completion');                                               
 		BAIL_OUT("Timed out waiting for authorisation grant code received from Xero. Did you follow the link on this computer or somewhere else?") if($proc->result eq "TIMEOUT");
 		my $interaction = thaw $result;
 		my $called_uri = $interaction->{request}->uri;
 		BAIL_OUT("Error returned by Xero: ".$called_uri->query_param('error')) if $called_uri->query_param('error');
 		BAIL_OUT("Authorisation grant doesn't contain a grant code") unless $called_uri->query_param('code');
-		
+
+		# Get an spanky new access token
+		like(dies { $xero->get_access_token() }, qr/No cache file specified/, "Grant code not provided") or note($@);
+		try_ok {$xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
+		ok(defined($xero->{_cache}->{_}->{access_token}), "Access token is stored");
+
 	}
 	
 	#~ note("Auth URL is $auth_url");

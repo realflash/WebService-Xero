@@ -132,7 +132,7 @@ sub _validate_agent
 
 	Retrieve the URL the user must go to to authenticate this app to one or more tenants.
 
-This URL will not visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO
+This URL will not be visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO
 
 =cut
 
@@ -140,6 +140,33 @@ sub get_auth_url
 {
 	my ( $self  ) = @_;
 	return $self->{_oauth}->authorize()->as_string();	# sic
+}
+
+=head2 get_access_token($grant_code)
+
+	Exchange the grant code received by your web app for a longer-lived access token
+	
+Once you have authorised this app to a Xero tenant, Xero will call your auth_code_url with parameters like this:
+  	?code=8877146d9aaebf16e84566edb9416ab9d9626a15e926fe389ba6dfbbdc34b98c&scope=openid%20profile%20email%20accounting.transactions%20accounting.attachments%20accounting.settings%20accounting.contacts%20offline_access&session_state=NaP2bbCmnUkXNn_5fdZPHMU1QQanRzl3G_Ew-IIF5Ik.84f54ec9f443c0e34d25b3be0157a50f_uri
+	
+Extract that code parameter and then provide it to this method to have us exchange that very short-lived grant code for an access token we can actually use to get to the API. Lives if retrieving an access token was successful, dies if not. The token will be stored in the internal cache, and used for sbusequent calls. 
+
+=cut
+
+sub get_access_token
+{
+	my $self = shift;
+	my $grant_code = shift;
+	
+	unless($grant_code)
+	{
+		$self->_error("Grant code not provided");
+	}
+	$self->{_cache}->{_}->{grant_code} = $grant_code;
+	$self->{_cache}->write($self->{CACHE_FILE});
+	my $access_token = $self->{_oauth}->get_access_token($grant_code);
+	$_log->trace(dump($access_token));
+	
 }
 
 =head2 get_all_xero_products_from_xero()
