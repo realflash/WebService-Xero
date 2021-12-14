@@ -86,7 +86,8 @@ sub new
 														redirect_uri => $self->{AUTH_CODE_URL},
 														authorize_url => 'https://login.xero.com/identity/connect/authorize',
 														access_token_url => 'https://identity.xero.com/connect/token',
-														refresh_token_url => 'https://identity.xero.com/connect/token');
+														refresh_token_url => 'https://identity.xero.com/connect/token',
+														secrets_in_params => 0);
 
 	# Check cache file is readable and writeable. Could well be come shenanigans here if run in a web server context
 	if(-e $self->{CACHE_FILE})
@@ -164,7 +165,11 @@ sub get_access_token
 	}
 	$self->{_cache}->{_}->{grant_code} = $grant_code;
 	$self->{_cache}->write($self->{CACHE_FILE});
-	my $access_token = $self->{_oauth}->get_access_token($grant_code);
+	#~ my $auth_code_uri = URI->new($self->{AUTH_CODE_URL});
+	#~ $auth_code_uri = URI->new($auth_code_uri->scheme."://".$auth_code_uri->host.$auth_code_uri->path);
+	#~ $_log->trace("Auth code URL with no port: ".$auth_code_uri->as_string());
+	#~ my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $auth_code_uri->as_string()));
+	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
 	$_log->trace(dump($access_token));
 	
 }
