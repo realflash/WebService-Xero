@@ -14,7 +14,9 @@ use URI;
 use URI::QueryParam;
 use Data::Validate::URI qw(is_uri is_https_uri is_web_uri);
 use File::Temp qw(tempfile);
-use Test::HTTP::MockServer;
+use Test::HTTP::MockServer::Once;
+use Async;
+use Storable qw(thaw);
 
 my $xero;
 Log::Log4perl->easy_init($DEBUG);
@@ -149,22 +151,33 @@ SKIP: {
 	}
 	else
 	{
-		note("No existing access token. Starting temp web server for authorisation");
-		my $server = Test::HTTP::MockServer->new();
+		note("No existing access token. Starting temp web server for authorisation grant");
+		my $server_uri = URI->new($config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'});
 		try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
 													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
 													CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
 													CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
 													CACHE_FILE => $cache_file,
-													AUTH_CODE_URL => $server->url_base(),
+													AUTH_CODE_URL => $server_uri->as_string,
 											  )} "Agent object initialises with temp web server";
-		my $handle_request_phase1 = sub {
+
+		my $server = Test::HTTP::MockServer::Once->new(port => $server_uri->port);
+		my $handle_request = sub {
 			my ($request, $response) = @_;
-			note(dump($request));
+			$response->content("OK");									# We shouldn't need to do anything here apart from give back something sensible to Xero
 		};
-		$server->start_mock_server($handle_request_phase1);
-		note("Web server running. Go to ".$xero->get_auth_url()." to authorise this testing code to access a Xero tenant");
-		$server->stop_mock_server();
+		my $proc = AsyncTimeout->new(sub { $server->start_mock_server($handle_request) }, 300, "TIMEOUT");
+		note("Web server running ready to receive authorisation grant from Xero. Go to this link below to authorise this testing code to access a Xero tenant, using THIS COMPUTER. I'll wait up to five minutes for you.");
+		note($xero->get_auth_url());
+
+		# wait until the request comes in or it times out
+		my $result = $proc->result('force completion');                                               
+		BAIL_OUT("Timed out waiting for authorisation grant code received from Xero. Did you follow the link on this computer or somewhere else?") if($proc->result eq "TIMEOUT");
+		my $interaction = thaw $result;
+		my $called_uri = $interaction->{request}->uri;
+		BAIL_OUT("Error returned by Xero: ".$called_uri->query_param('error')) if $called_uri->query_param('error');
+		BAIL_OUT("Authorisation grant doesn't contain a grant code") unless $called_uri->query_param('code');
+		
 	}
 	
 	#~ note("Auth URL is $auth_url");
