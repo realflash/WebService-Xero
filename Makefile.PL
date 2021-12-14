@@ -14,7 +14,7 @@ WriteMakefile(
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
     },
-    BUILD_REQUIRES => {
+    TEST_REQUIRES => {
         'Test::More'				=> 0.88,
         'Test2::Tools::Exception'	=> 0,
         'Config::Tiny' 				=> 0,
@@ -22,7 +22,8 @@ WriteMakefile(
         'Data::Validate::URI'		=> 0,
         'URI::QueryParam'			=> 0,
         'File::Temp'				=> 0,
-        'Test::Fake::HTTPD'			=> 0
+        'Test::HTTP::MockServer::Once'	=> 0
+        'Test::HTTP::MockServer::Once'	=> 0
     },
     PREREQ_PM => {
         'Config::Tiny'			=> 0,
