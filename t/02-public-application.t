@@ -17,6 +17,7 @@ use File::Temp qw(tempfile);
 use Test::HTTP::MockServer::Once;
 use Async;
 use Storable qw(thaw);
+use DateTime;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -193,7 +194,8 @@ SKIP: {
 		is($xero->{_cache}->{access_token}->auto_refresh, 1, "Access token auto refresh is on");
 	}
 
-	#~ note("Access code ".dump($xero->{_cache}->{access_token}));
+	my $expiry_time = DateTime->from_epoch(epoch => $xero->{_cache}->{access_token}->expires_at());
+	note("Access token expires at ".$expiry_time->iso8601());
 	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);

@@ -16,6 +16,7 @@ WriteMakefile(
     },
     TEST_REQUIRES => {
         'Test::More'				=> 0.88,
+        'DateTime'					=> 0,
         'Test2::Tools::Exception'	=> 0,
         'Config::Tiny' 				=> 0,
         'JSON'						=> 0,
@@ -26,7 +27,7 @@ WriteMakefile(
         'Test::HTTP::MockServer::Once'	=> 0
     },
     PREREQ_PM => {
-        'Config::Tiny'			=> 0,
+        'Try::Tiny'				=> 0,
         'File::Slurp'			=> 0,
         'XML::Simple'			=> 0,
         'Digest::MD5'			=> 0,
