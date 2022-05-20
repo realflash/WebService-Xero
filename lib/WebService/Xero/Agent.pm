@@ -165,13 +165,8 @@ sub get_access_token
 	}
 	$self->{_cache}->{_}->{grant_code} = $grant_code;
 	$self->{_cache}->write($self->{CACHE_FILE});
-	#~ my $auth_code_uri = URI->new($self->{AUTH_CODE_URL});
-	#~ $auth_code_uri = URI->new($auth_code_uri->scheme."://".$auth_code_uri->host.$auth_code_uri->path);
-	#~ $_log->trace("Auth code URL with no port: ".$auth_code_uri->as_string());
-	#~ my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $auth_code_uri->as_string()));
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
-	$_log->trace(dump($access_token));
-	
+	$self->{_cache}->{_}->{access_token} = $access_token;
 }
 
 =head2 get_all_xero_products_from_xero()
