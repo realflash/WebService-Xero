@@ -89,12 +89,12 @@ sub new
 														refresh_token_url => 'https://identity.xero.com/connect/token',
 														secrets_in_params => 0);
 
-	# Check cache file is readable and writeable. Could well be come shenanigans here if run in a web server context
+	# Check cache file is readable and writeable. Could well be some shenanigans here if run in a web server context, and this should flush any errors out earlier
 	if(-e $self->{CACHE_FILE})
 	{
 		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable for file system access reasons"); return $self; }
 		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable for file system access reasons"); return $self; }
-		$self->{_cache} = Config::Tiny->read($self->{CACHE_FILE});
+		$self->{_cache} = Config::Tiny->read($self->{CACHE_FILE}, 'utf8');
 		unless($self->{_cache})
 		{
 			$self->_error("Specified cache file exists and is corrupt: ".Config::Tiny->errstr); return $self;
@@ -107,7 +107,7 @@ sub new
 	else
 	{	# Create a cache and save it now to see if it blows up
 		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
-		unless($self->{_cache}->write($self->{CACHE_FILE}))
+		unless($self->{_cache}->write($self->{CACHE_FILE}, 'utf8'))
 		{	# Write was attempted and went wrong somehow
 			$self->_error("Specified cache file doesn't exist and is not writeable: ".Config::Tiny->errstr); return $self;
 		}
@@ -165,8 +165,8 @@ sub get_access_token
 	}
 	$self->{_cache}->{_}->{grant_code} = $grant_code;
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
-	$self->{_cache}->{_}->{access_token} = $access_token;
-	$self->{_cache}->write($self->{CACHE_FILE});
+	$self->{_cache}->{_}->{access_token} = $access_token->session_freeze();
+	$self->{_cache}->write($self->{CACHE_FILE}, 'utf8');
 }
 
 =head2 get_all_xero_products_from_xero()
