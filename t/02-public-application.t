@@ -197,6 +197,17 @@ SKIP: {
 	my $expiry_time = DateTime->from_epoch(epoch => $xero->{_cache}->{access_token}->expires_at());
 	note("Access token expires at ".$expiry_time->iso8601());
 	
+	# Check that the access token is still valid for at least one tenant
+	my $tenants;
+	try_ok { $tenants = $xero->do_xero_api_call("https://api.xero.com/connections") } "Executed a GET command successfully";
+	is(ref($tenants), "ARRAY", "Method has returned an object and not an error string");
+	ok(scalar(@$tenants) > 0, "At least one tenant is authorised so that we can continue testing");
+	if(scalar(@$tenants) > 1)
+	{
+		note("You are authorised to access more than one tenant. Testing against the first tenant in the list, ".$$tenants[0]->{'tenantName'});
+	}
+	my $tenant_id = $$tenants[0]->{'tenantId'};
+	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
 
