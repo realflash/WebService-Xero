@@ -10,14 +10,14 @@ use Data::Dump qw(dump);
 use LWP::UserAgent;
 use HTTP::Request;
 use Mozilla::CA;
-use Config::Tiny;
+use Storable;
 use JSON;
 use XML::Simple;
 use Digest::MD5 qw( md5_base64 );
 use URI::Encode qw(uri_encode uri_decode );
 use Data::Random qw( rand_chars );
 use Net::OAuth2::Profile::WebServer 0.67;
-
+use Try::Tiny;
 use WebService::Xero::Organisation;
 use XML::Simple;
 
@@ -94,23 +94,40 @@ sub new
 	{
 		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable for file system access reasons"); return $self; }
 		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable for file system access reasons"); return $self; }
-		$self->{_cache} = Config::Tiny->read($self->{CACHE_FILE}, 'utf8');
+		try
+		{
+			$self->{_cache} = retrieve($self->{CACHE_FILE});
+		} 
+		catch
+		{
+			die "Couldn't retrieve existing cache file: $_";
+		};
 		unless($self->{_cache})
 		{
-			$self->_error("Specified cache file exists and is corrupt: ".Config::Tiny->errstr); return $self;
+			die "Couldn't retrieve existing cache file: reason unknown";
 		}
 		else
 		{
-			$self->{_cache}->{_}->{WebService_Xero_version} = $VERSION;
+			$self->{_cache}->{WebService_Xero_version} = $VERSION;		# Store our version
+			if($self->{_cache}->{access_token})
+			{
+				$self->{_cache}->{access_token} = $self->{_cache}->{access_token}->session_thaw();	# Unthaw into active token ready for use
+				print dump($self->{_cache}->{access_token});
+				$self->{_cache}->{access_token}->auto_refresh(1);			# Auto refresh it if it is needed
+			}
 		}
 	}
 	else
 	{	# Create a cache and save it now to see if it blows up
-		$self->{_cache} = Config::Tiny->new({ _ => { WebService_Xero_version => $VERSION }});
-		unless($self->{_cache}->write($self->{CACHE_FILE}, 'utf8'))
-		{	# Write was attempted and went wrong somehow
-			$self->_error("Specified cache file doesn't exist and is not writeable: ".Config::Tiny->errstr); return $self;
+		$self->{_cache} = { WebService_Xero_version => $VERSION };
+		try
+		{
+			store $self->{_cache}, $self->{CACHE_FILE};
 		}
+		catch
+		{	# Write was attempted and went wrong somehow
+			die "Couldn't write to cache file: $_";
+		};
 	}
 
     return $self;
@@ -163,16 +180,15 @@ sub get_access_token
 	{
 		$self->_error("Grant code not provided");
 	}
-	$self->{_cache}->{_}->{grant_code} = $grant_code;
+	$self->{_cache}->{grant_code} = $grant_code;
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
-	$self->{_cache}->{_}->{access_token} = $access_token->session_freeze();
-	
-	unless($self->{_cache}->write($self->{CACHE_FILE}, 'utf8'))
+	$self->{_cache}->{access_token} = $access_token->session_freeze();
+	unless(store $self->{_cache}, $self->{CACHE_FILE})
 	{	# Write was attempted and went wrong somehow
-		 die "Specified cache file is not writeable: ".Config::Tiny->errstr;
+		$self->_error("Couldn't write to cache file: $@"); return $self;
 	}
 	
-	return $access_token->session_freeze();
+	return $access_token;
 }
 
 =head2 get_all_xero_products_from_xero()

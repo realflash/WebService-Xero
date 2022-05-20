@@ -77,7 +77,7 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => "/79347293474897/WebServiceXero.cache",
 																	AUTH_CODE_URL => $callback_url); },
-																	qr/doesn't exist and is not writeable/, "Non-existent cache file is not writeable") or note($@);
+																	qr/No such file or directory/, "Non-existent cache file is not writeable") or note($@);
 # Create cache file for testing
 my $tmp = File::Temp->new( TEMPLATE => 'WebService::Xero_test_XXXXX',
 					   DIR => '/tmp',
@@ -107,7 +107,7 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	CLIENT_SECRET => "uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP",
 																	CACHE_FILE => $tmp->filename,
 																	AUTH_CODE_URL => $callback_url); },
-																	qr/corrupt/, "Corrupted cache file is detected") or note($@);
+																	qr/Couldn't/, "Corrupted cache file is detected") or note($@);
 
 ## Test a valid although unusable configuration
 unlink($cache_file) if -e $cache_file;									# Delete it if it exists
@@ -189,8 +189,9 @@ SKIP: {
 		my $access_token;
 		like(dies { $xero->get_access_token() }, qr/Grant code not provided/, "Handled no grant code provided") or note($@);
 		try_ok {$access_token = $xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
-		ok(defined($xero->{_cache}->{_}->{access_token}), "Access token is stored");
-		note("Access code ".dump($access_token));
+		ok(defined($xero->{_cache}->{access_token}), "Access token is stored");
+		ok(defined($xero->{_cache}->{access_token}->auto_refresh()), "Access token auto refresh is on");
+		note("Access code ".dump($access_token->thaw));
 		
 	}
 	
