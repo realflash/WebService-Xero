@@ -22,13 +22,14 @@ use DateTime;
 my $xero;
 Log::Log4perl->easy_init($TRACE);
 my $cache_file = '/tmp/WebServiceXero.cache';
-my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL. The fragment can be anything,
+my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL, and localhost. The fragment can be anything,
 																		# it just can't be empty. So http://127.0.0.1:3000 doesn't work - the Xero firewall deems it some
-																		# kind of remote file inclusion attack and blocks it, returning an HTTP 403. http://172.0.0.1:3000/something
+																		# kind of remote file inclusion attack and blocks it, returning an HTTP 403. http://localhost:3000/something
 																		# does work. Our mock server Test::HTTP::MockServer::Once does not care about fragments, it returns 
 																		# the same content no matter the fragment, so that's fine.
 																		# This particular value is not used in anger, so it doesn't matter if it does or doesn't match what's
 																		# in the test config
+my $demo_company_uk_id = "fadbc06c-ced4-498d-a28d-42428e8c20d6";		# Anyone can join this Xero tenant and mess about with it. Best place for potentially destructive testing.
 
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
@@ -164,7 +165,7 @@ SKIP: {
 
 	if($xero->{_cache}->{access_token})
 	{
-		note("Found an existing access token. Attempting to use or referesh it");
+		note("Found an existing access token. Attempting to use it. Refresh occurs automatically if possible.");
 	}
 	else
 	{
@@ -202,12 +203,22 @@ SKIP: {
 	try_ok { $tenants = $xero->do_xero_api_call("https://api.xero.com/connections") } "Executed a GET command successfully";
 	is(ref($tenants), "ARRAY", "Method has returned an object and not an error string");
 	ok(scalar(@$tenants) > 0, "At least one tenant is authorised so that we can continue testing");
-	if(scalar(@$tenants) > 1)
+	# Check if the demo company that is suitable for testing is included in the list
+	my $testing_tenant;
+	foreach my $tenant (@$tenants)
 	{
-		note("You are authorised to access more than one tenant. Testing against the first tenant in the list, ".$$tenants[0]->{'tenantName'});
+		if($tenant->{'tenantId'} eq $demo_company_uk_id)
+		{
+			$testing_tenant = $tenant;
+		}
+		# I'm guessing there is an AU demo company too that we could put in this list so that AU people can run these tests
 	}
-	my $tenant_id = $$tenants[0]->{'tenantId'};
 	
+	SKIP: {
+		skip ("You are authorised to access one or more tenants but the demo company that is suitable for testing is not one of them. See docs. Testing terminated early so I don't spew a load of test data into your production Xero tenant.") unless $testing_tenant;
+		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
+	}
+
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
 
