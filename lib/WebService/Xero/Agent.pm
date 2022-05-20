@@ -166,7 +166,13 @@ sub get_access_token
 	$self->{_cache}->{_}->{grant_code} = $grant_code;
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
 	$self->{_cache}->{_}->{access_token} = $access_token->session_freeze();
-	$self->{_cache}->write($self->{CACHE_FILE}, 'utf8');
+	
+	unless($self->{_cache}->write($self->{CACHE_FILE}, 'utf8'))
+	{	# Write was attempted and went wrong somehow
+		 die "Specified cache file is not writeable: ".Config::Tiny->errstr;
+	}
+	
+	return $access_token->session_freeze();
 }
 
 =head2 get_all_xero_products_from_xero()
