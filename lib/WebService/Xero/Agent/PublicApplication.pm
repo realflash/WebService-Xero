@@ -10,7 +10,7 @@ use Digest::MD5 qw( md5_base64 );
 use URI::Encode qw(uri_encode uri_decode );
 use Data::Random qw( rand_chars );
 use Net::OAuth2 0.67;
-use Data::Validate::URI qw(is_web_uri);
+use Data::Validate::URI qw(is_uri);
 
 =head1 NAME
 
@@ -63,7 +63,7 @@ sub _validate_agent
 	unless($self->{AUTH_CODE_URL}) { $self->_error("No auth code URL specified in constructor"); return $self; }
 	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
 	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
-	unless(is_web_uri($self->{AUTH_CODE_URL})) { $self->_error("Auth code URL is not a valid HTTP or HTTPS URL"); return $self; }
+	unless(is_uri($self->{AUTH_CODE_URL})) { $self->_error("Auth code URL is not a valid HTTP or HTTPS URL"); return $self; }
 	$_log->trace("Constructor got these params: ".dump(@_));
 
 	return $self;
