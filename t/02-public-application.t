@@ -21,11 +21,13 @@ use Storable qw(thaw);
 my $xero;
 Log::Log4perl->easy_init($TRACE);
 my $cache_file = '/tmp/WebServiceXero.cache';
-my $callback_url = 'http://127.0.0.1:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL. The fragment can be anything,
+my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL. The fragment can be anything,
 																		# it just can't be empty. So http://127.0.0.1:3000 doesn't work - the Xero firewall deems it some
 																		# kind of remote file inclusion attack and blocks it, returning an HTTP 403. http://172.0.0.1:3000/something
 																		# does work. Our mock server Test::HTTP::MockServer::Once does not care about fragments, it returns 
 																		# the same content no matter the fragment, so that's fine.
+																		# This particular value is not used in anger, so it doesn't matter if it does or doesn't match what's
+																		# in the test config
 
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
@@ -185,9 +187,9 @@ SKIP: {
 
 		# Get an spanky new access token
 		note("Grant code ".$called_uri->query_param('code'));
-		#~ like(dies { $xero->get_access_token() }, qr/Grant code not provided/, "Handled no grant code provided") or note($@);
-		#~ try_ok {$xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
-		#~ ok(defined($xero->{_cache}->{_}->{access_token}), "Access token is stored");
+		like(dies { $xero->get_access_token() }, qr/Grant code not provided/, "Handled no grant code provided") or note($@);
+		try_ok {$xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
+		ok(defined($xero->{_cache}->{_}->{access_token}), "Access token is stored");
 
 	}
 	

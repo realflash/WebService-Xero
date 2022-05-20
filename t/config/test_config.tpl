@@ -15,4 +15,4 @@
 NAME			= 
 CLIENT_ID		= 
 CLIENT_SECRET	=
-AUTH_CODE_URL	= http://127.0.0.1:3000
+AUTH_CODE_URL	= http://localhost:3000/auth
