@@ -114,7 +114,7 @@ unlink($cache_file) if -e $cache_file;									# Delete it if it exists
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
 																	CACHE_FILE => $cache_file,
-																	AUTH_CODE_URL => "https://127.0.0.1:3000")} "Correct parameters don't throw exception, HTTPS; also cache file creation from nothing";
+																	AUTH_CODE_URL => "https://localhost:3000/auth")} "Correct parameters don't throw exception, HTTPS; also cache file creation from nothing";
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
 																	CACHE_FILE => $cache_file,

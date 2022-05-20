@@ -15,4 +15,6 @@
 NAME			= 
 CLIENT_ID		= 
 CLIENT_SECRET	=
+Data::Validate::URI
+# This URL has to be registered on developer.xero.com before it works!
 AUTH_CODE_URL	= http://localhost:3000/auth
