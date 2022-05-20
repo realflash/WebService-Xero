@@ -186,7 +186,7 @@ SKIP: {
 		BAIL_OUT("Authorisation grant doesn't contain a grant code") unless $called_uri->query_param('code');
 
 		# Get an spanky new access token
-		note("Grant code ".$called_uri->query_param('code'));
+		#~ note("Grant code ".$called_uri->query_param('code'));
 		like(dies { $xero->get_access_token() }, qr/Grant code not provided/, "Handled no grant code provided") or note($@);
 		try_ok {$xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
 		ok(defined($xero->{_cache}->{_}->{access_token}), "Access token is stored");
