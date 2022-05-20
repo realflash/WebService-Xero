@@ -108,13 +108,13 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	CACHE_FILE => $tmp->filename,
 																	AUTH_CODE_URL => $callback_url); },
 																	qr/Couldn't/, "Corrupted cache file is detected") or note($@);
+unlink($tmp->filename); 												# Can leave rubbish lying around if tests fail
 
 ## Test a valid although unusable configuration
-unlink($cache_file) if -e $cache_file;									# Delete it if it exists
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
 																	CACHE_FILE => $cache_file,
-																	AUTH_CODE_URL => "https://localhost:3000/auth")} "Correct parameters don't throw exception, HTTPS; also cache file creation from nothing";
+																	AUTH_CODE_URL => "https://localhost:3000/auth")} "Correct parameters don't throw exception, HTTPS; also valid cache file reading";
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
 																	CACHE_FILE => $cache_file,
@@ -152,22 +152,22 @@ SKIP: {
 	is($auth_uri->query_param('scope'), "openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access", "scope is correctly defined");
 	
 	# Get an access token
-	if($xero->{_cache}->{_}->{access_token})
+	my $server_uri = URI->new($config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'});
+	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
+												NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
+												CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
+												CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
+												CACHE_FILE => $cache_file,
+												AUTH_CODE_URL => $server_uri->as_string,
+										  )} "Agent object initialises with temp web server URI";
+
+	if($xero->{_cache}->{access_token})
 	{
 		note("Found an existing access token. Attempting to use or referesh it");
 	}
 	else
 	{
 		note("No existing access token. Starting temp web server for authorisation grant");
-		my $server_uri = URI->new($config->{'PUBLIC_APPLICATION'}->{'AUTH_CODE_URL'});
-		try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
-													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
-													CLIENT_ID	=> $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}, 
-													CLIENT_SECRET => $config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'},
-													CACHE_FILE => $cache_file,
-													AUTH_CODE_URL => $server_uri->as_string,
-											  )} "Agent object initialises with temp web server";
-
 		my $server = Test::HTTP::MockServer::Once->new(port => $server_uri->port);
 		my $handle_request = sub {
 			my ($request, $response) = @_;
@@ -190,11 +190,10 @@ SKIP: {
 		like(dies { $xero->get_access_token() }, qr/Grant code not provided/, "Handled no grant code provided") or note($@);
 		try_ok {$access_token = $xero->get_access_token($called_uri->query_param('code'))} "Got access token from grant code";
 		ok(defined($xero->{_cache}->{access_token}), "Access token is stored");
-		ok(defined($xero->{_cache}->{access_token}->auto_refresh()), "Access token auto refresh is on");
-		note("Access code ".dump($access_token->thaw));
-		
+		is($xero->{_cache}->{access_token}->auto_refresh, 1, "Access token auto refresh is on");
 	}
-	
+
+	#~ note("Access code ".dump($xero->{_cache}->{access_token}));
 	
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);

@@ -97,6 +97,7 @@ sub new
 		try
 		{
 			$self->{_cache} = retrieve($self->{CACHE_FILE});
+			#~ print dump($self->{_cache});
 		} 
 		catch
 		{
@@ -111,8 +112,8 @@ sub new
 			$self->{_cache}->{WebService_Xero_version} = $VERSION;		# Store our version
 			if($self->{_cache}->{access_token})
 			{
-				$self->{_cache}->{access_token} = $self->{_cache}->{access_token}->session_thaw();	# Unthaw into active token ready for use
-				print dump($self->{_cache}->{access_token});
+				$self->{_cache}->{access_token} = Net::OAuth2::AccessToken->session_thaw($self->{_cache}->{access_token}, profile => $self->{_oauth});	# Unthaw into active token ready for use
+				#~ print dump($self->{_cache}->{access_token});
 				$self->{_cache}->{access_token}->auto_refresh(1);			# Auto refresh it if it is needed
 			}
 		}
@@ -182,12 +183,12 @@ sub get_access_token
 	}
 	$self->{_cache}->{grant_code} = $grant_code;
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
-	$self->{_cache}->{access_token} = $access_token->session_freeze();
-	unless(store $self->{_cache}, $self->{CACHE_FILE})
+	$self->{_cache}->{access_token} = $access_token->session_freeze();	# Save the access token in the cache in frozen format for storage
+	unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache
 	{	# Write was attempted and went wrong somehow
 		$self->_error("Couldn't write to cache file: $@"); return $self;
 	}
-	
+	$self->{_cache}->{access_token} = $access_token;					# Save the access token in the cache in thawed format for immediate use
 	return $access_token;
 }
 
