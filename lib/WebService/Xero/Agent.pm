@@ -178,14 +178,24 @@ sub get_access_token
 		$self->_error("Grant code not provided");
 	}
 	$self->{_cache}->{grant_code} = $grant_code;
-	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
-	$self->{_cache}->{access_token} = $access_token->session_freeze();	# Save the access token in the cache in frozen format for storage
-	unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache
-	{	# Write was attempted and went wrong somehow
-		$self->_error("Couldn't write to cache file: $@"); return $self;
+	# Save the access token in the cache in thawed format for immediate use
+	$self->{_cache}->{access_token} = $self->{_oauth}->get_access_token($grant_code, 
+												(grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
+	return $self->{_cache}->{access_token};
+}
+
+sub DESTROY
+{
+	my $self = shift;
+	
+	if($self->{_cache}->{access_token})
+	{
+		$self->{_cache}->{access_token} = $self->{_cache}->{access_token}->session_freeze();	# Save the access token in the cache in frozen format for storage
+		unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache
+		{	# Write was attempted and went wrong somehow
+			die("Couldn't write to cache file: $@");
+		}
 	}
-	$self->{_cache}->{access_token} = $access_token;					# Save the access token in the cache in thawed format for immediate use
-	return $access_token;
 }
 
 =head2 get_all_xero_products_from_xero()
