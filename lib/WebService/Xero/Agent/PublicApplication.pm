@@ -64,7 +64,7 @@ sub _validate_agent
 	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
 	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
 	unless(is_uri($self->{AUTH_CODE_URL})) { $self->_error("Auth code URL is not a valid HTTP or HTTPS URL"); return $self; }
-	$_log->trace("Constructor got these params: ".dump(@_));
+	#~ $_log->trace("Constructor got these params: ".dump(@_));
 
 	return $self;
 }
