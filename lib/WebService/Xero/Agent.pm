@@ -133,7 +133,7 @@ sub _validate_agent
 
 	Retrieve the URL the user must go to to authenticate this app to one or more tenants.
 
-This URL will not be visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO
+This URL will not be visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO also register URL on developer.xero.com
 
 =cut
 
