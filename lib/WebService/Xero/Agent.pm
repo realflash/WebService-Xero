@@ -164,9 +164,9 @@ sub get_access_token
 		$self->_error("Grant code not provided");
 	}
 	$self->{_cache}->{_}->{grant_code} = $grant_code;
-	$self->{_cache}->write($self->{CACHE_FILE});
 	my $access_token = $self->{_oauth}->get_access_token($grant_code, (grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
 	$self->{_cache}->{_}->{access_token} = $access_token;
+	$self->{_cache}->write($self->{CACHE_FILE});
 }
 
 =head2 get_all_xero_products_from_xero()
