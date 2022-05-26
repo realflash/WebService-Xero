@@ -65,6 +65,7 @@ sub new
       CLIENT_SECRET => $params{CLIENT_SECRET} || "",
       CACHE_FILE => $params{CACHE_FILE} || "",
       AUTH_CODE_URL => $params{AUTH_CODE_URL} || "",
+      TENANT_ID => $params{TENANT_ID} || "",
       ua              => LWP::UserAgent->new(ssl_opts => { verify_hostname => 1 },),
       _status           => undef,
       _oauth           => undef,
@@ -262,56 +263,11 @@ sub get_all_customer_invoices_from_xero
 =cut 
 
 
-sub do_xero_put_call
-{
-  my ( $self, $uri, $method, $xml ) = @_;
-
-  my $encryption = 'RSA-SHA1';
-  $encryption = 'HMAC-SHA1' if (defined $self->{TOKEN} and $self->{TOKEN} ne $self->{CLIENT_ID} ); 
-  $self->{TOKEN}        = $self->{CLIENT_ID}    unless  $self->{TOKEN};
-  $self->{TOKEN_SECRET} = $self->{CLIENT_SECRET} unless  $self->{TOKEN_SECRET};
-
-my $access = Net::OAuth->request("protected resource")->new(
-    client_id     => $self->{CLIENT_ID},
-    client_secret  => $self->{CLIENT_SECRET},
-    token            => $self->{TOKEN},
-    token_secret     => $self->{TOKEN_SECRET},
-    request_url      => $uri,
-    request_method   => $method,
-    signature_method => $encryption,
-    timestamp        => time,
-    nonce => 'ccp' . md5_base64( join('', rand_chars(size => 8, set => 'alphanumeric')) . time ), 
-);
-  if ( $self->{TOKEN} eq $self->{CLIENT_ID} ) 
-  {
-    $access->sign( $self->{pko} );
-  }
-  else
-  {
-    $access->sign(); ## HMAC-SHA1 is self signed
-  }
-my $request = HTTP::Request->new( 'PUT', $access->to_url );
-$request->content( $xml );
-my $res = $self->{ua}->request( $request );
-if ($res->is_success) {
-  print $res->content;
-  my $ref = XMLin( $res->content );
-  return $ref;
-} else {
-  return $self->api_error($res->content);
-}
-
-
-
-}
-
-#######
-
-
 sub do_xero_api_call
 {
-  my ( $self, $uri, $method, $xml ) = @_;
+  my ( $self, $uri, $method, $json ) = @_;
   $method = 'GET' unless $method;
+  # TODO: Barf if no tenant ID is set and if there is no cached creds
 
   my $wantsPdf = 0;
   if ( $method =~ /pdf$/ )
@@ -322,23 +278,14 @@ sub do_xero_api_call
 
   my $data = undef;
   my $req = HTTP::Request->new( $method,  $uri );
-   $req->header(Authorization => "Bearer ".$self->{_cache}->{access_token}->access_token());
+  $req->header('Authorization' => "Bearer ".$self->{_cache}->{access_token}->access_token());
+  $req->header('Xero-Tenant-Id' => $self->{TENANT_ID});
   
-  if ( $method eq 'POST' )
+  if ( $method eq 'POST' || $method eq 'PUT')
   {
-    $req->header(  'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8');
-    $req->header( 'Accept' => 'application/json');
-    #~ $req->content( $access->to_post_body ) if defined $xml; TODO this needs re-doing for oauth2
-  }
-  elsif ( $method eq 'PUT' )
-  {
-    return $self->do_xero_put_call( $uri, $method, $xml );
-    #$req = HTTP::Request::Common::PUT( $uri );
-    #$req = HTTP::Request->new( 'PUT', $access->to_url );
-    #$req->header(  'Content-Type' => 'application/xml; charset=utf-8');
-    #$req->header( 'Accept' => 'application/json');
-    #$req->header(Authorization => $access->to_authorization_header);
-    #$req->content( $xml ) if defined $xml;
+    $req->header( 'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8' );
+    $req->header( 'Accept' => 'application/json' );
+    $req->content( $json ) if defined $json;
   }
   elsif ( $method eq 'GET' )
   {

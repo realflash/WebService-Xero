@@ -199,8 +199,9 @@ SKIP: {
 	note("Access token expires at ".$expiry_time->iso8601());
 	
 	# Check that the access token is still valid for at least one tenant
+	# GET
 	my $tenants;
-	try_ok { $tenants = $xero->do_xero_api_call("https://api.xero.com/connections") } "Executed a GET command successfully";
+	try_ok { $tenants = $xero->do_xero_api_call("https://api.xero.com/connections") } "Got tenant list successfully";
 	is(ref($tenants), "ARRAY", "Method has returned an object and not an error string");
 	ok(scalar(@$tenants) > 0, "At least one tenant is authorised so that we can continue testing");
 	# Check if the demo company that is suitable for testing is included in the list
@@ -219,6 +220,45 @@ SKIP: {
 		skip ("You are authorised to access one or more tenants but the demo company that is suitable for testing is not one of them. See docs. Testing terminated early so I don't spew a load of test data into your production Xero tenant.") unless $testing_tenant;
 		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
 	}
+
+	# Now check that GET, PUT and POST calls against the test tenant all work as expected
+	$xero->{'TENANT_ID'} = $testing_tenant->{'tenantId'};
+	# PUT a new contact - here's Xero's example:
+	#{ "Contacts": [ { "ContactID": "3ff6d40c-af9a-40a3-89ce-3c1556a25591", "ContactStatus": "ACTIVE", "Name": "Foo9987", "EmailAddress": "sid32476@blah.com", "BankAccountDetails": "", "Addresses": [ { "AddressType": "STREET", "City": "", "Region": "", "PostalCode": "", "Country": "" }, { "AddressType": "POBOX", "City": "", "Region": "", "PostalCode": "", "Country": "" } ], "Phones": [ { "PhoneType": "DEFAULT", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "DDI", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "FAX", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "MOBILE", "PhoneNumber": "555-1212", "PhoneAreaCode": "415", "PhoneCountryCode": "" } ], "UpdatedDateUTC": "/Date(1551399321043+0000)/", "ContactGroups": [], "IsSupplier": false, "IsCustomer": false, "SalesTrackingCategories": [], "PurchasesTrackingCategories": [], "PaymentTerms": { "Bills": { "Day": 15, "Type": "OFCURRENTMONTH" }, "Sales": { "Day": 10, "Type": "DAYSAFTERBILLMONTH" } }, "ContactPersons": [] } ] }
+	my $random_contact_name = "WSX_".int(rand(1000000));
+	my $test_contact_json = '
+{
+  "Contacts": [
+    {
+      "Name": "'.$random_contact_name.'",
+    }
+  ]
+} 
+';
+	my $response; 
+	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "PUT", $test_contact_json) } "PUT a new contact successfully";
+	is($response->{'Status'}, "OK", "API reports success");
+	my $contact = $response->{'Contacts'}[0];
+	my $contact_id = $contact->{'ContactID'};
+
+	# GET a contact
+	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id") } "GET the contact";
+	is($response->{'Status'}, "OK", "API reports success");
+	is($response->{'Contacts'}[0]->{'Name'}, $random_contact_name, "Expected contact was returned");
+
+	# POST an update to a contact
+	$test_contact_json = '
+	{
+	"Contacts": [
+	{
+	  "ContactID": "'.$contact_id.'",
+	  "ContactStatus": "ARCHIVED",
+	}
+	]
+	} 
+	';
+	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
+	is($response->{'Status'}, "OK", "API reports success");
 
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
