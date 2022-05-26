@@ -212,6 +212,7 @@ SKIP: {
 			$testing_tenant = $tenant;
 		}
 		# I'm guessing there is an AU demo company too that we could put in this list so that AU people can run these tests
+		note("You have access to tenant ".$tenant->{'tenantName'}." (".$tenant->{'tenantId'}.")");
 	}
 	
 	SKIP: {
