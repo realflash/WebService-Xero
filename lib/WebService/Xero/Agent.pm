@@ -269,13 +269,6 @@ sub do_xero_api_call
   $method = 'GET' unless $method;
   # TODO: Barf if no tenant ID is set and if there is no cached creds
 
-  my $wantsPdf = 0;
-  if ( $method =~ /pdf$/ )
-  {
-    $wantsPdf = 1;
-    $method =~ s/pdf$//;
-  }
-
   my $data = undef;
   my $req = HTTP::Request->new( $method,  $uri );
   $req->header('Authorization' => "Bearer ".$self->{_cache}->{access_token}->access_token());
@@ -289,10 +282,6 @@ sub do_xero_api_call
   }
   elsif ( $method eq 'GET' )
   {
-    if ( $wantsPdf ) 
-    {
-      $req->header( 'Accept' => 'application/pdf');
-    } else 
     {
       $req->header( 'Accept' => 'application/json');
     }
