@@ -20,6 +20,7 @@ use Net::OAuth2::Profile::WebServer 0.67;
 use Try::Tiny;
 use WebService::Xero::Organisation;
 use XML::Simple;
+use Scalar::Util qw(openhandle);
 
 =head1 NAME
 
@@ -265,7 +266,7 @@ sub get_all_customer_invoices_from_xero
 
 sub do_xero_api_call
 {
-  my ( $self, $uri, $method, $json ) = @_;
+  my ( $self, $uri, $method, $content ) = @_;
   $method = 'GET' unless $method;
   # TODO: Barf if no tenant ID is set and if there is no cached creds
 
@@ -278,7 +279,14 @@ sub do_xero_api_call
   {
     $req->header( 'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8' );
     $req->header( 'Accept' => 'application/json' );
-    $req->content( $json ) if defined $json;
+	if(openhandle($content))
+	{
+		# Do something to load the content of a file;
+	}
+	else
+	{
+		$req->content( $content ) if defined $content;
+	}
   }
   elsif ( $method eq 'GET' )
   {
@@ -294,12 +302,13 @@ sub do_xero_api_call
   if ($res->is_success)
   {
     $self->{status} = 'GOT RESPONSE FROM XERO API CALL';
-    if ( $wantsPdf ) 
+    if ( $res->header('Content-Type') =~ qr/application\/json/ )
     {
-      $data = $res->content || return $self->api_error( $res->content );  
-    } else 
+		$data = from_json($res->content) || return $self->api_error( $res->content );  
+    }
+    else 
     {
-        $data = from_json($res->content) || return $self->api_error( $res->content );  
+		$data = $res->content || return $self->api_error( $res->content );  
     }
   } 
   else 
