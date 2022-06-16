@@ -21,7 +21,8 @@ use DateTime;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
-my $cache_file = '/tmp/WebServiceXero.cache';
+my $cache_file = '~/.WebServiceXero.cache';								# It's tempting to make this a /tmp file but in order to test re-authorisation after a few days you don't
+																		# the file disappearing in a reboot.
 my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL, and localhost. The fragment can be anything,
 																		# it just can't be empty. So http://127.0.0.1:3000 doesn't work - the Xero firewall deems it some
 																		# kind of remote file inclusion attack and blocks it, returning an HTTP 403. http://localhost:3000/something
