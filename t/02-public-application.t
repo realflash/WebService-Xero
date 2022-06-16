@@ -21,7 +21,7 @@ use DateTime;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
-my $cache_file = '~/.WebServiceXero.cache';								# It's tempting to make this a /tmp file but in order to test re-authorisation after a few days you don't
+my $cache_file = $ENV{"HOME"}.'/.WebServiceXero.cache';					# It's tempting to make this a /tmp file but in order to test re-authorisation after a few days you don't
 																		# the file disappearing in a reboot.
 my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth service requires a fragment in the URL, and localhost. The fragment can be anything,
 																		# it just can't be empty. So http://127.0.0.1:3000 doesn't work - the Xero firewall deems it some
@@ -229,11 +229,11 @@ SKIP: {
 	my $random_contact_name = "WSX_".int(rand(1000000));
 	my $test_contact_json = '
 {
-  "Contacts": [
-    {
-      "Name": "'.$random_contact_name.'",
-    }
-  ]
+	"Contacts": [
+		{
+		"Name": "'.$random_contact_name.'",
+		}
+	]
 } 
 ';
 	my $response; 
@@ -247,19 +247,38 @@ SKIP: {
 	is($response->{'Status'}, "OK", "API reports success");
 	is($response->{'Contacts'}[0]->{'Name'}, $random_contact_name, "Expected contact was returned");
 
+	# PUT an existing contact
+	$test_contact_json = '
+{
+	"Contacts": [
+		{
+			"ContactID": "'.$contact_id.'",
+			"EmailAddress": "imadethis@up.com",
+		}
+	]
+} 
+	';
+	# This should return this truly terrible error response:
+	#UNRECOGNISED API ERROR '{"Title":"An error occurred","Detail":"An error occurred in Xero. Check the API Status page http://status.developer.xero.com for current service status.","Status":500,"Instance":"b90a8446-13fc-4ea1-b950-7652d8710fda"}'
+	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/"Status":500/, "PUT a new contact which conflicts with an existing contact");								
+	is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
+
 	# POST an update to a contact
 	$test_contact_json = '
-	{
+{
 	"Contacts": [
-	{
-	  "ContactID": "'.$contact_id.'",
-	  "ContactStatus": "ARCHIVED",
-	}
+		{
+			"ContactID": "'.$contact_id.'",
+			"ContactStatus": "ARCHIVED",
+		}
 	]
-	} 
+} 
 	';
 	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
 	is($response->{'Status'}, "OK", "API reports success");
+
+	
+	
 
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
