@@ -297,9 +297,9 @@ sub do_xero_api_call
   }
   elsif ( $method eq 'GET' )
   {
-    {
-      $req->header( 'Accept' => 'application/json');
-    }
+    #~ {
+      #~ $req->header( 'Accept' => 'application/json');
+    #~ }
   } 
   else 
   {
