@@ -319,7 +319,6 @@ sub do_xero_api_call
 		# We can't really tell what will be appropriate for the user in terms of how it is read and when
 		# destroying it will be appropriate
 		my $bytes = $res->content || return $self->api_error( $res->content );
-		print "Downloading $1";
 		open FILE, ">", "/tmp/$1" or return $self->_error("COULDN'T OPEN /tmp/$1 FOR WRITING");
 		binmode FILE;
 		print FILE $bytes;
