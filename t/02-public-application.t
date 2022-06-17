@@ -19,6 +19,7 @@ use Async;
 use Storable qw(thaw);
 use DateTime;
 use FindBin qw($RealBin);
+use Digest::MD5;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -273,27 +274,35 @@ SKIP: {
 	';
 	# This should return this truly terrible error response:
 	#UNRECOGNISED API ERROR '{"Title":"An error occurred","Detail":"An error occurred in Xero. Check the API Status page http://status.developer.xero.com for current service status.","Status":500,"Instance":"b90a8446-13fc-4ea1-b950-7652d8710fda"}'
-	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
+	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
 	is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
 
 	# Attach a file to something
-	my $test_file = "";
-	note($RealBin);
-	#try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, "Attach a file to a contact");	
+	my $test_file = "chameleon.jpg";									# 5Mb. Enough to not be trivial.
+	my $test_file_path = "$RealBin/chameleon.jpg";
+	my $test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
+	open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
+	binmode $fh;
+	try_ok { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); } "Attach a file to a contact";
+	note("Uploaded file to $test_file_uri");
+	# Check the file we get back is the same as what we uploaded
+	my $md5 = Digest::MD5->new; $md5->addfile($fh);
+	my $test_file_md5 = $md5->hexdigest();
+	note("Original $test_file_md5");
 
 	# POST an update to a contact
-	$test_contact_json = '
-{
-	"Contacts": [
-		{
-			"ContactID": "'.$contact_id.'",
-			"ContactStatus": "ARCHIVED",
-		}
-	]
-} 
-	';
-	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
-	is($response->{'Status'}, "OK", "API reports success");
+	#~ $test_contact_json = '
+#~ {
+	#~ "Contacts": [
+		#~ {
+			#~ "ContactID": "'.$contact_id.'",
+			#~ "ContactStatus": "ARCHIVED",
+		#~ }
+	#~ ]
+#~ } 
+	#~ ';
+	#~ try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
+	#~ is($response->{'Status'}, "OK", "API reports success");
 
 	
 
