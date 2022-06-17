@@ -18,6 +18,7 @@ use Test::HTTP::MockServer::Once;
 use Async;
 use Storable qw(thaw);
 use DateTime;
+use FindBin qw($RealBin);
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -113,6 +114,16 @@ like(dies { $xero = WebService::Xero::Agent::PublicApplication->new(CLIENT_ID =>
 																	qr/Couldn't/, "Corrupted cache file is detected") or note($@);
 unlink($tmp->filename); 												# Can leave rubbish lying around if tests fail
 
+# Untaint this variable so Storable doesn't bitch
+if ($cache_file =~ /^([-_\w\.\/]+)$/)
+{
+	$cache_file = $1;
+}
+else
+{
+	die 'Bad data in $cache_file variable';
+}
+
 ## Test a valid although unusable configuration
 try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID	=> '7CA8F60E5C7D479CA71EB7958F0B16A8', 
 																	CLIENT_SECRET => 'uIHcAADccDLmbrBo-WrbxTgwjaUAzxMbp897EOac2Q2VhqrP',
@@ -197,7 +208,7 @@ SKIP: {
 	}
 
 	my $expiry_time = DateTime->from_epoch(epoch => $xero->{_cache}->{access_token}->expires_at());
-	note("Access token expires at ".$expiry_time->iso8601());
+	note("Access token expires at ".$expiry_time->iso8601()."Z");
 	
 	# Check that the access token is still valid for at least one tenant
 	# GET
@@ -237,12 +248,14 @@ SKIP: {
 } 
 ';
 	my $response; 
+	note("Access token expires at ".$expiry_time->iso8601()."Z");
 	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "PUT", $test_contact_json) } "PUT a new contact successfully";
 	is($response->{'Status'}, "OK", "API reports success");
 	my $contact = $response->{'Contacts'}[0];
 	my $contact_id = $contact->{'ContactID'};
 
 	# GET a contact
+	note("Access token expires at ".$expiry_time->iso8601()."Z");
 	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id") } "GET the contact";
 	is($response->{'Status'}, "OK", "API reports success");
 	is($response->{'Contacts'}[0]->{'Name'}, $random_contact_name, "Expected contact was returned");
@@ -260,8 +273,13 @@ SKIP: {
 	';
 	# This should return this truly terrible error response:
 	#UNRECOGNISED API ERROR '{"Title":"An error occurred","Detail":"An error occurred in Xero. Check the API Status page http://status.developer.xero.com for current service status.","Status":500,"Instance":"b90a8446-13fc-4ea1-b950-7652d8710fda"}'
-	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/"Status":500/, "PUT a new contact which conflicts with an existing contact");								
+	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
 	is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
+
+	# Attach a file to something
+	my $test_file = "";
+	note($RealBin);
+	#try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, "Attach a file to a contact");	
 
 	# POST an update to a contact
 	$test_contact_json = '
@@ -277,7 +295,6 @@ SKIP: {
 	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
 	is($response->{'Status'}, "OK", "API reports success");
 
-	
 	
 
 	TODO: {
