@@ -280,8 +280,15 @@ sub do_xero_api_call
     $req->header( 'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8' );
     $req->header( 'Accept' => 'application/json' );
 	if(openhandle($content))
-	{
-		# Do something to load the content of a file;
+	{	# We have been passed a file handle
+		my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime,
+				$mtime, $ctime, $blksize, $blocks) = stat($content);
+		my $max_file_size = "10485760"; 								# Max 10Mb according to the files API Documentation
+		return $self->_error('ONLY FILES 10Mb or less supported by Xero API') if $size > $max_file_size;
+		binmode $content;												# Make sure we are reading bytes
+		my $data; read $content, $data, $size;							# Slurp the whole file at once
+		$req->content( $data );											# Place in content of body
+																		# Something somewhere else seems to be magically setting the Content-Type header so we don't need to
 	}
 	else
 	{
