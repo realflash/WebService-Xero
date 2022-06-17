@@ -22,7 +22,6 @@ WriteMakefile(
         'JSON'						=> 0,
         'Data::Validate::URI'		=> 0,
         'URI::QueryParam'			=> 0,
-        'File::Temp'				=> 0,
         'Test::HTTP::MockServer::Once'	=> 0
         'Test::HTTP::MockServer::Once'	=> 0
     },
@@ -43,6 +42,7 @@ WriteMakefile(
         'Data::Dump'			=> 0,
         'Data::Validate::URI'	=> 0,
         'Scalar::Util'			=> 0,
+        'File::Temp'			=> 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean => { FILES => 'WebService-Xero-*' },

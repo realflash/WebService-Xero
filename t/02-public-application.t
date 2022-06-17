@@ -278,33 +278,42 @@ SKIP: {
 	is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
 
 	# Attach a file to something
-	my $test_file = "chameleon.jpg";									# 5Mb. Enough to not be trivial.
+	my $test_file = "chameleon.jpg";									# 300Kb. Enough to not be trivial.
 	my $test_file_path = "$RealBin/chameleon.jpg";
 	my $test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
 	open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
 	binmode $fh;
 	try_ok { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); } "Attach a file to a contact";
 	note("Uploaded file to $test_file_uri");
+	# Download the file again to confirm it got there OK.
+	try_ok { $response = $xero->do_xero_api_call($test_file_uri, "GET"); } "Attach a file to a contact";
+	note("File saved to $response");
+	
 	# Check the file we get back is the same as what we uploaded
 	my $md5 = Digest::MD5->new; $md5->addfile($fh);
 	my $test_file_md5 = $md5->hexdigest();
-	note("Original $test_file_md5");
+	$md5->reset;
+	close $fh;
+	open($fh, "<", $response) or die "Couldn't open downloaded test file $response";
+	binmode $fh;
+	$md5->addfile($fh);
+	my $returned_file_md5 = $md5->hexdigest();
+	close $fh;
+	is($test_file_md5, $returned_file_md5, "File we downloaded is the same as the one we uploaded");
 
-	# POST an update to a contact
-	#~ $test_contact_json = '
-#~ {
-	#~ "Contacts": [
-		#~ {
-			#~ "ContactID": "'.$contact_id.'",
-			#~ "ContactStatus": "ARCHIVED",
-		#~ }
-	#~ ]
-#~ } 
-	#~ ';
-	#~ try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
-	#~ is($response->{'Status'}, "OK", "API reports success");
-
-	
+	#~ # POST an update to a contact (archiving the mess we made earlier)
+	$test_contact_json = '
+{
+	"Contacts": [
+		{
+			"ContactID": "'.$contact_id.'",
+			"ContactStatus": "ARCHIVED",
+		}
+	]
+} 
+	';
+	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
+	is($response->{'Status'}, "OK", "API reports success");
 
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);

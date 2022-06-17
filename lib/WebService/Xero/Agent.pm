@@ -21,6 +21,7 @@ use Try::Tiny;
 use WebService::Xero::Organisation;
 use XML::Simple;
 use Scalar::Util qw(openhandle);
+use File::Temp qw(tempfile);
 
 =head1 NAME
 
@@ -313,16 +314,23 @@ sub do_xero_api_call
     {
 		$data = from_json($res->content) || return $self->api_error( $res->content );  
     }
-    else 
-    {
-		$data = $res->content || return $self->api_error( $res->content );  
+    elsif($uri =~ qr/Attachments\/(.*)/)
+    {	# Content probably an attachment being retrieved, stick it in a temp file and pass back the name.
+		# We can't really tell what will be appropriate for the user in terms of how it is read and when
+		# destroying it will be appropriate
+		my $bytes = $res->content || return $self->api_error( $res->content );
+		print "Downloading $1";
+		open FILE, ">", "/tmp/$1" or return $self->_error("COULDN'T OPEN /tmp/$1 FOR WRITING");
+		binmode FILE;
+		print FILE $bytes;
+		$data = "/tmp/$1";
     }
-  } 
+  }
   else 
   {
     return $self->api_error($res->content);
   }
-  return $data;
+  return $data, ;
 }
 
 
