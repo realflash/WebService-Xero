@@ -32,10 +32,6 @@ my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth 
 																		# the same content no matter the fragment, so that's fine.
 																		# This particular value is not used in anger, so it doesn't matter if it does or doesn't match what's
 																		# in the test config
-my $test_tenant_id = $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'};	# These potentially destructive tests (including creating and deleting data) will be carried out in this tenant.
-																		# There is a demo company in Xero that anyone can join and mess about with. It's called "Demo Company (UK)". 
-																		# It gets reset sometimes, and the tenant ID changes so this test config will need to be updated and this library
-																		# re-connected.
 																			
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
@@ -145,9 +141,15 @@ SKIP: {
 
 	## VALIDATE CONFIGURATION FILE
 	ok( my $config =  Config::Tiny->read( './t/config/test_config.ini' ) , 'Load Config defined at ./t/config/test_config.ini }' );
-	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}), "Config file has an ID in it");
-	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file hs a secret in it");
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'NAME'}), "Config file has an name in it");				# Has to be globally unique so we can't default it
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'}), "Config file has an ID in it");				# Has to be obtained by registering the app
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'CLIENT_SECRET'}), "Config file has a secret in it");		# Has to be obtained by registering the app
+	ok(defined($config->{'PUBLIC_APPLICATION'}->{'TEST_TENANT_ID'}), "Config file has a testing tenant");	# Has to chosen carefully and user has to join it
 
+	my $test_tenant_id = $config->{'PUBLIC_APPLICATION'}->{'TEST_TENANT_ID'};	# These potentially destructive tests (including creating and deleting data) will be carried out 
+																				# in this tenant. There is a demo company in Xero that anyone can join and mess about with. It's called
+																				# "Demo Company (UK)". It gets reset sometimes, and the tenant ID changes so this test config will need
+																				# to be updated and this library re-connected.
 	# Initialise with config file
 	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
 													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
