@@ -31,6 +31,7 @@ Xero provides Public Applications only. You can choose whether or not to publish
 This is the simplest possible implementation:
 
     use WebService::Xero::Agent::PublicApplication;
+    use Data::Dump qw(dump);
 
     $xero = WebService::Xero::Agent::PublicApplication->new( 
 													NAME	    => "My Xero App",	# Must match registered name
@@ -50,7 +51,8 @@ This is the simplest possible implementation:
 	$xero->get_access_token(<your_grant_code>);
 	
 	# Access code is now stored inside your $xero object and persisted to CACHE_FILE. Should be good for 90 days
-	$xero->{'TENANT_ID'} = "<UUID_of_tenant_you_want_to_interact_with>";
+	#print dump($xero->do_xero_api_call("https://api.xero.com/connections"));						# Call this once to get a list of tenant IDs
+	$xero->{'TENANT_ID'} = "<UUID_of_tenant_you_want_to_interact_with>";							# Then set the tenant you want here
 	$contact = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/<contact_id>");
 
 =head2 DOCUMENTATION
