@@ -322,6 +322,7 @@ sub do_xero_api_call
 		open FILE, ">", "/tmp/$1" or return $self->_error("COULDN'T OPEN /tmp/$1 FOR WRITING");
 		binmode FILE;
 		print FILE $bytes;
+		close FILE;
 		$data = "/tmp/$1";
     }
   }

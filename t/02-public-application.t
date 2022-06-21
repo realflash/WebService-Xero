@@ -20,6 +20,7 @@ use Storable qw(thaw);
 use DateTime;
 use FindBin qw($RealBin);
 use Digest::MD5;
+use File::stat;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
@@ -289,29 +290,23 @@ SKIP: {
 	binmode $fh;
 	try_ok { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); } "Attach a file to a contact";
 	close $fh;
-	note("Uploaded file to $test_file_uri");
 	# Download the file again to confirm it got there OK.
 	my $downloaded_file_path;
 	try_ok { $downloaded_file_path = $xero->do_xero_api_call($test_file_uri, "GET"); } "Attach a file to a contact";
-	note("File saved to $downloaded_file_path");
 	
-	# Check the file we get back is the same as what we uploaded
-	#~ open($fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
-	#~ binmode $fh;
-	#~ my $md5 = Digest::MD5->new; $md5->addfile($fh);
-	#~ my $test_file_md5 = $md5->hexdigest();
-	#~ note("$test_file_md5");
-	#~ close $fh;
-	#~ open($fh, "<", $response) or die "Couldn't open downloaded test file $response";
-	#~ binmode $fh;
-	#~ $md5 = Digest::MD5->new;
-	#~ $md5->addfile($fh);
-	#~ my $returned_file_md5 = $md5->hexdigest();
-	#~ close $fh;
-	#~ is($returned_file_md5, $test_file_md5, "File we downloaded is the same as the one we uploaded");
-	my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime, $mtime, $ctime, $blksize, $blocks) = stat($test_file_path);
-	my ($dev2, $ino2, $mode2, $nlink2, $uid2, $gid2, $rdev2, $size2, $atime2, $mtime2, $ctime2, $blksize2, $blocks2) = stat($downloaded_file_path);
-	is($size2, $size, "File we downloaded is the same as the one we uploaded");
+	#~ # Check the file we get back is the same as what we uploaded
+	open($fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
+	binmode $fh;
+	my $md5 = Digest::MD5->new; $md5->addfile($fh);
+	my $test_file_md5 = $md5->hexdigest();
+	close $fh;
+	open($fh, "<", $downloaded_file_path) or die "Couldn't open downloaded test file $response";
+	binmode $fh;
+	$md5 = Digest::MD5->new;
+	$md5->addfile($fh);
+	my $returned_file_md5 = $md5->hexdigest();
+	close $fh;
+	is($returned_file_md5, $test_file_md5, "File we downloaded is the same as the one we uploaded");
 
 	#~ # POST an update to a contact (archiving the mess we made earlier)
 	$test_contact_json = '
