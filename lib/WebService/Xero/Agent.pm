@@ -15,7 +15,6 @@ use JSON;
 use XML::Simple;
 use Digest::MD5 qw( md5_base64 );
 use URI::Encode qw(uri_encode uri_decode );
-use Data::Random qw( rand_chars );
 use Net::OAuth2::Profile::WebServer 0.67;
 use Try::Tiny;
 use WebService::Xero::Organisation;
