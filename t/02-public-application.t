@@ -314,7 +314,7 @@ SKIP: {
 	$test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
 	open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
 	binmode $fh;
-	like( dies { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); }, qr/TOO LARGE/, "Attach a file to a contact");
+	like( dies { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); }, qr/TOO LARGE/, "Reject a file that is larger than the API's max file size");
 	close $fh;
 
 	#~ # POST an update to a contact (archiving the mess we made earlier)
