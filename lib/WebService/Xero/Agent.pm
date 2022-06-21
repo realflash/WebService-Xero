@@ -89,20 +89,19 @@ sub new
 	# Check cache file is readable and writeable. Could well be some shenanigans here if run in a web server context, and this should flush any errors out earlier
 	if(-e $self->{CACHE_FILE})
 	{
-		unless(-r $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not readable for file system access reasons"); return $self; }
-		unless(-w $self->{CACHE_FILE}){ $self->_error("Specified cache file exists and is not writeable for file system access reasons"); return $self; }
+		unless(-r $self->{CACHE_FILE}){ return $self->_error("Specified cache file exists and is not readable for file system access reasons") }
+		unless(-w $self->{CACHE_FILE}){ return $self->_error("Specified cache file exists and is not writeable for file system access reasons") }
 		try
 		{
 			$self->{_cache} = retrieve($self->{CACHE_FILE});
-			#~ print dump($self->{_cache});
 		} 
 		catch
 		{
-			die "Couldn't retrieve existing cache file: $_";
+			return $self->_error("Couldn't retrieve existing cache file: $_");
 		};
 		unless($self->{_cache})
 		{
-			die "Couldn't retrieve existing cache file: reason unknown";
+			return $self->_error("Couldn't retrieve existing cache file: reason unknown");
 		}
 		else
 		{
@@ -110,7 +109,6 @@ sub new
 			if($self->{_cache}->{access_token})
 			{
 				$self->{_cache}->{access_token} = Net::OAuth2::AccessToken->session_thaw($self->{_cache}->{access_token}, profile => $self->{_oauth});	# Unthaw into active token ready for use
-				#~ print dump($self->{_cache}->{access_token});
 				$self->{_cache}->{access_token}->auto_refresh(1);			# Auto refresh it if it is needed
 			}
 		}
@@ -124,7 +122,7 @@ sub new
 		}
 		catch
 		{	# Write was attempted and went wrong somehow
-			die "Couldn't write to cache file: $_";
+			return $self->_error("Couldn't write to cache file: $_");
 		};
 	}
 
@@ -176,7 +174,7 @@ sub get_access_token
 	
 	unless($grant_code)
 	{
-		$self->_error("Grant code not provided");
+		return $self->_error("Grant code not provided");
 	}
 	$self->{_cache}->{grant_code} = $grant_code;
 	# Save the access token in the cache in thawed format for immediate use
@@ -194,7 +192,7 @@ sub DESTROY
 		$self->{_cache}->{access_token} = $self->{_cache}->{access_token}->session_freeze();	# Save the access token in the cache in frozen format for storage
 		unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache
 		{	# Write was attempted and went wrong somehow
-			die("Couldn't write to cache file: $@");
+			return $self->_error("Couldn't write to cache file: $@");
 		}
 	}
 }
