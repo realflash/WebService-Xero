@@ -280,7 +280,7 @@ sub do_xero_api_call
 		my ($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size, $atime,
 				$mtime, $ctime, $blksize, $blocks) = stat($content);
 		my $max_file_size = "10485760"; 								# Max 10Mb according to the files API Documentation
-		return $self->_error('ONLY FILES 10Mb or less supported by Xero API') if $size > $max_file_size;
+		return $self->_error('FILE TOO LARGE; only files 10Mb or less supported by Xero API') if $size > $max_file_size;
 		binmode $content;												# Make sure we are reading bytes
 		my $data; read $content, $data, $size;							# Slurp the whole file at once
 		$req->content( $data );											# Place in content of body
