@@ -35,7 +35,7 @@ our $VERSION = '0.13';
 
 This is the base class for the Xero API agents that integrate with the Xero Web Application APIs.
 
-You should not need to use this directly but should use one of the derived classes.
+You should not need to use this directly but should use the derived class.
 
 see the following for usage examples:
 
@@ -47,7 +47,7 @@ see the following for usage examples:
 
 =head2 new()
 
-  default base constructor - includes properties used by child classes.
+  default base constructor - includes properties used by child class.
 
 =cut
 
@@ -143,7 +143,7 @@ sub _validate_agent
 
 	Retrieve the URL the user must go to to authenticate this app to one or more tenants.
 
-This URL will not be visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. Xero will then call TODO also register URL on developer.xero.com
+This URL will not be visited automatically by this module. The person who is going to authorise this code to connect to a Xero tenant using their Xero crendentials needs to visit this link in a graphical web browser and carry out the authorisation process. See L<WebService::Xero::Agent::PublicApplication> for full information.
 
 =cut
 
@@ -391,12 +391,9 @@ sub get_status
 }
 
 
+=head1 AUTHORS
 
-
-
-=head1 AUTHOR
-
-Peter Scott, C<< <peter at computerpros.com.au> >>
+Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<igibbs@cpan.org>
 
 =head1 BUGS
 
@@ -404,38 +401,39 @@ Please report any bugs or feature requests to C<bug-ccp-xero at rt.cpan.org>, or
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CCP-Xero>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
-
-    perldoc WebService::Xero
-
 
 You can also look for information at:
 
 =over 4
 
+=item * Xero Developer Documentation Home
+
+L<https://developer.xero.com/>
+
+=item * Xero API Reference
+
+L<https://developer.xero.com/documentation/api/accounting/overview>
+
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CCP-Xero>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=WebService-Xero>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/CCP-Xero>
+L<http://annocpan.org/dist/WebService-Xero>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/CCP-Xero>
+L<http://cpanratings.perl.org/d/WebService-Xero>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/CCP-Xero/>
+L<http://search.cpan.org/dist/WebService-Xero/>
 
 =back
-
 
 =head1 ACKNOWLEDGEMENTS
 

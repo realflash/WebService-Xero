@@ -216,7 +216,7 @@ Connect to the Xero API:  https://api.xero.com/api.xro/2.0/
 
 =head1 AUTHOR
 
-Peter Scott, C<< <peter at computerpros.com.au> >>
+Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<igibbs@cpan.org>
 
 =head1 BUGS
 
@@ -224,19 +224,21 @@ Please report any bugs or feature requests to C<bug-webservice-xero at rt.cpan.o
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WebService-Xero>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc WebService::Xero::Agent::PublicApplication
-
-
 You can also look for information at:
 
 =over 4
+
+=item * Xero Developer Documentation Home
+
+L<https://developer.xero.com/>
+
+=item * Xero API Reference
+
+L<https://developer.xero.com/documentation/api/accounting/overview>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
@@ -255,7 +257,6 @@ L<http://cpanratings.perl.org/d/WebService-Xero>
 L<http://search.cpan.org/dist/WebService-Xero/>
 
 =back
-
 
 =head1 ACKNOWLEDGEMENTS
 
