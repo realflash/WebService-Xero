@@ -53,7 +53,11 @@ This is the simplest possible implementation:
 	$xero->{'TENANT_ID'} = "<UUID_of_tenant_you_want_to_interact_with>";
 	$contact = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/<contact_id>");
 
-=head2 Limits
+=head2 DOCUMENTATION
+
+To get started see L<WebService::Xero::Agent::PublicApplication>.
+
+=head2 LIMITS
 
 Xero API call limits are 5,000/day and 60/minute request per organisation limit as described at L<https://developer.xero.com/documentation/guides/oauth2/limits/>.
 
