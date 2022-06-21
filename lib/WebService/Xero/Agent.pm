@@ -9,10 +9,9 @@ use Log::Log4perl;
 use Data::Dump qw(dump);
 use LWP::UserAgent;
 use HTTP::Request;
-use Mozilla::CA;
+use Mozilla::CA;									# Needed for LWP HTTPS
 use Storable;
 use JSON;
-use XML::Simple;
 use Digest::MD5 qw( md5_base64 );
 use URI::Encode qw(uri_encode uri_decode );
 use Net::OAuth2::Profile::WebServer 0.67;

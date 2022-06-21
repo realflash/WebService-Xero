@@ -28,7 +28,6 @@ WriteMakefile(
     PREREQ_PM => {
         'Try::Tiny'				=> 0,
         'File::Slurp'			=> 0,
-        'XML::Simple'			=> 0,
         'Digest::MD5'			=> 0,
         'URI::Encode'			=> 0,
         'HTTP::Request'			=> 0,
