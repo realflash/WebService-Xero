@@ -32,8 +32,11 @@ my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth 
 																		# the same content no matter the fragment, so that's fine.
 																		# This particular value is not used in anger, so it doesn't matter if it does or doesn't match what's
 																		# in the test config
-my $demo_company_uk_id = "fadbc06c-ced4-498d-a28d-42428e8c20d6";		# Anyone can join this Xero tenant and mess about with it. Best place for potentially destructive testing.
-
+my $test_tenant_id = $config->{'PUBLIC_APPLICATION'}->{'CLIENT_ID'};	# These potentially destructive tests (including creating and deleting data) will be carried out in this tenant.
+																		# There is a demo company in Xero that anyone can join and mess about with. It's called "Demo Company (UK)". 
+																		# It gets reset sometimes, and the tenant ID changes so this test config will need to be updated and this library
+																		# re-connected.
+																			
 # Test bad parameters
 # Client ID should be 32 chars long. There's no credential format standardisation in the protocol so this could change in future but it will help confirm the user hasn't accidentially failed to copy the whole thing
 # Client secret should be 48 chars long
@@ -217,20 +220,19 @@ SKIP: {
 	try_ok { $tenants = $xero->do_xero_api_call("https://api.xero.com/connections") } "Got tenant list successfully";
 	is(ref($tenants), "ARRAY", "Method has returned an object and not an error string");
 	ok(scalar(@$tenants) > 0, "At least one tenant is authorised so that we can continue testing");
-	# Check if the demo company that is suitable for testing is included in the list
+	# Check if the tenant intended for testing is included in the list
 	my $testing_tenant;
 	foreach my $tenant (@$tenants)
 	{
-		if($tenant->{'tenantId'} eq $demo_company_uk_id)
+		if($tenant->{'tenantId'} eq $test_tenant_id)
 		{
 			$testing_tenant = $tenant;
 		}
-		# I'm guessing there is an AU demo company too that we could put in this list so that AU people can run these tests
 		note("You have access to tenant ".$tenant->{'tenantName'}." (".$tenant->{'tenantId'}.")");
 	}
 	
 	SKIP: {
-		skip ("You are authorised to access one or more tenants but the demo company that is suitable for testing is not one of them. See docs. Testing terminated early so I don't spew a load of test data into your production Xero tenant.") unless $testing_tenant;
+		skip ("You are authorised to access one or more tenants but the tenant configured for testing is not one of them.") unless $testing_tenant;
 		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
 	}
 
