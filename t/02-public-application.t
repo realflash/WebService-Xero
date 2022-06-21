@@ -20,7 +20,6 @@ use Storable qw(thaw);
 use DateTime;
 use FindBin qw($RealBin);
 use Digest::MD5;
-use File::stat;
 
 my $xero;
 Log::Log4perl->easy_init($TRACE);
