@@ -16,7 +16,6 @@ use URI::Encode qw(uri_encode uri_decode );
 use Net::OAuth2::Profile::WebServer 0.67;
 use Try::Tiny;
 use WebService::Xero::Organisation;
-use XML::Simple;
 use Scalar::Util qw(openhandle);
 use File::Temp qw(tempfile);
 
