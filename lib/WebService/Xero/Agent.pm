@@ -269,7 +269,9 @@ sub do_xero_api_call
 {
   my ( $self, $uri, $method, $content ) = @_;
   $method = 'GET' unless $method;
-  # TODO: Barf if no tenant ID is set and if there is no cached creds
+
+  return $self->_error('RETRIEVE AN ACCESS TOKEN FIRST') unless $self->{_cache}->{access_token}->access_token();
+  return $self->_error('NO TENANT ID SET') unless $self->{TENANT_ID};
 
   my $data = undef;
   my $req = HTTP::Request->new( $method,  $uri );
