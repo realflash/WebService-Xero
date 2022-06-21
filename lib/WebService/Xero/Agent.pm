@@ -264,7 +264,7 @@ sub do_xero_api_call
   $method = 'GET' unless $method;
 
   return $self->_error('RETRIEVE AN ACCESS TOKEN FIRST') unless $self->{_cache}->{access_token}->access_token();
-  return $self->_error('NO TENANT ID SET') unless $self->{TENANT_ID};
+  return $self->_error('NO TENANT ID SET') unless $self->{TENANT_ID} || $uri eq "https://api.xero.com/connections";
 
   my $data = undef;
   my $req = HTTP::Request->new( $method,  $uri );
