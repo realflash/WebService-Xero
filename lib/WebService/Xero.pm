@@ -20,36 +20,48 @@ our $VERSION = '0.13';
 =head1 SYNOPSIS
 
 
-The Xero API is a RESTful web service and uses the OAuth (v1.0a) L<https://oauth.net/core/1.0a/> protocol to authenticate 3rd party applications.
+The Xero API is a RESTful web service and uses the OAuth (v2.0) L<https://oauth.net/2/> protocol to authenticate 3rd party applications.
 
 WebService::Xero aims primarily to simplify the authenticated access to Xero API service end-point by encapuslating the OAuth requirements.
 
-To enable API access see the Xero Getting started guide
-
-L<https://developer.xero.com/documentation/getting-started/getting-started-guide/>
-
-and with the Configured Application Authentication Credentials from L<https://api.xero.com/Application> 
-
-this module will allow to to access the API Services.
+A number of steps are necessary to register your application, documented below. Once completed, this module will allow you to access the API Services.
 
 Xero provides Public Applications only. You can choose whether or not to publish them in the marketplace. The simpler Private Applications are no longer available, and nor are any tenant-wide API keys. You must perform user-specific OAuth2 authentication, which this module implements for you.
 
 This is the simplest possible implementation:
 
     use WebService::Xero::Agent::PublicApplication;
-    use Data::Dumper;
 
-    TODO
+    $xero = WebService::Xero::Agent::PublicApplication->new( 
+													NAME	    => "My Xero App",	# Must match registered name
+													CLIENT_ID	=> "<get_this_when_registering>",
+													CLIENT_SECRET => "<get_this_when_registering>",
+													CACHE_FILE => "/path/to/secured/file/you/want/to/store/tokens/in",
+													AUTH_CODE_URL => "http://localhost:3000/auth",	# Web page you make and register the URL of with Xero
+																									# In order to receive your grant code and and access tokens
+																									# Quick shortcut for this documented below
+													);
+													
+	print $xero->get_auth_url()."\n";									# User clicks this link in their web browser to authenticate your app to their tenant
+																		# Once every 90 days
+	
+	# Once user has authorised your app, Xero will call your AUTH_CODE_URL and append ?code=<your-grant-code>
+	# Your web page will have to pass this to your code
+	$xero->get_access_token(<your_grant_code>);
+	
+	# Access code is now stored inside your $xero object and persisted to CACHE_FILE. Should be good for 90 days
+	$xero->{'TENANT_ID'} = "<UUID_of_tenant_you_want_to_interact_with>";
+	$contact = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/<contact_id>");
 
 =head2 Limits
 
-Xero API call limits are 1,000/day and 60/minute request per organisation limit as described at L<https://developer.xero.com/documentation/getting-started/xero-api-limits/>.
+Xero API call limits are 5,000/day and 60/minute request per organisation limit as described at L<https://developer.xero.com/documentation/guides/oauth2/limits/>.
 
-I have started to work at encpsulating the Xero data objects (Contact, Item, Invoice etc ) and will refine for the next release.
+I have started to work at encpsulating the Xero data objects (Contact, Item, Invoice etc ) and will refine for the next release. The module is usable as of now.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Peter Scott, C<< <peter at computerpros.com.au> >>
+Peter Scott, C<< <peter at computerpros.com.au> >>, Ian Gibbs C<igibbs@cpan.org>
 
 =head1 BUGS
 
@@ -57,27 +69,21 @@ Please report any bugs or feature requests to C<bug-WebService-Xero at rt.cpan.o
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=WebService-Xero>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
-
-
-
 
 You can also look for information at:
 
 =over 4
 
-=item * Xero Developer Documentation 
+=item * Xero Developer Documentation Home
 
-L<https://developer.xero.com/documentation/api/api-overview/>
+L<https://developer.xero.com/>
 
-=item * Xero API DTD Schemas
+=item * Xero API Reference
 
-L<https://github.com/XeroAPI/XeroAPI-Schemas>
+L<https://developer.xero.com/documentation/api/accounting/overview>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
@@ -102,9 +108,9 @@ L<http://search.cpan.org/dist/WebService-Xero/>
 
 =over 4
 
-=item * Net::Xero for the OAUTH Code 
+=item * Net::OAuth2 for the OAUTH Code 
 
-L<https://metacpan.org/pod/Net::Xero>
+L<https://metacpan.org/pod/Net::OAuth2>
 
 
 =item * Steve Bertrand for advice on Perlmonks 
@@ -112,7 +118,6 @@ L<https://metacpan.org/pod/Net::Xero>
 L<https://metacpan.org/author/STEVEB>
 
 =back
-
 
 =head1 LICENSE AND COPYRIGHT
 
