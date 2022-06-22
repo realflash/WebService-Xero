@@ -47,5 +47,5 @@ WriteMakefile(
         'File::Temp'			=> 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'WebService-Xero-* html' },
+    clean => { FILES => 'WebService-Xero-* html tmp' },
 );
