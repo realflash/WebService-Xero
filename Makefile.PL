@@ -1,7 +1,7 @@
 use 5.006;
 use strict;
 use warnings;
-use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker 6.055_03;
 
 WriteMakefile(
     NAME             => 'WebService::Xero',
@@ -9,11 +9,16 @@ WriteMakefile(
     VERSION_FROM     => 'lib/WebService/Xero.pm',
     ABSTRACT_FROM    => 'lib/WebService/Xero.pm',
     LICENSE          => 'artistic_2',
-    PL_FILES         => {},
+    PL_FILES         => {'make_html_docs.PL' => 'make_html_docs'},
     MIN_PERL_VERSION => 5.012,
     CONFIGURE_REQUIRES => {
         'ExtUtils::MakeMaker' => 0,
     },
+    BUILD_REQUIRES => {
+		'ExtUtils::MakeMaker' => 0,
+		'File::Find' => 0,
+		'Path::Class' => 0
+	},
     TEST_REQUIRES => {
         'Test::More'				=> 0.88,
         'DateTime'					=> 0,
@@ -22,7 +27,6 @@ WriteMakefile(
         'JSON'						=> 0,
         'Data::Validate::URI'		=> 0,
         'URI::QueryParam'			=> 0,
-        'Test::HTTP::MockServer::Once'	=> 0
         'Test::HTTP::MockServer::Once'	=> 0
     },
     PREREQ_PM => {
@@ -43,5 +47,5 @@ WriteMakefile(
         'File::Temp'			=> 0,
     },
     dist  => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
-    clean => { FILES => 'WebService-Xero-*' },
+    clean => { FILES => 'WebService-Xero-* html' },
 );

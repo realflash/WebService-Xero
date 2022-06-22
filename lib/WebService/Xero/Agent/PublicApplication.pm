@@ -27,26 +27,32 @@ my $_log = Log::Log4perl->get_logger("WebService::Xero::PublicApplication");
 
 =head1 SYNOPSIS
 
-Public Applications
+See L<WebService::Xero> for code. The steps to use this module are:
 
-Public applications use a 3-legged authorisation process. A user will need to authorise your application against each organisation that 
-you want access to. For a great description of the 3-legged flow see L<http://oauthbible.com/#oauth-10a-three-legged> .
+=over
 
-For a working example that uses Mojolicious Web Framework see L<https://github.com/pscott-au/mojolicious-xero-public-app-demo>
+=item *
+Register application on the Xero Developer portal
 
+=item 1
+Create an instance of this module configured with various bits of auth information
 
-=head2 XERO PUBLIC APPLICATION API CONFIGURATION
+=item 1
+Have a user authorise the application to a Xero tenant, grabbing the grant code as you do it
 
-Public applications are configured in the Xero Developer API Console. These setting are used in your application to access your user's Xero Accounting data through Xero's Public Application API.
+=item 1
+Give the grant code to this module so that it can get credentials
 
-Your users will be directed from your website to Xero and asked for access confirmation. If they agree your application will use an Access Token to query Xero data for the life of the session (up to 30 minutes).
+=item 1
+Use this module to query the various Xero APIs
 
-You application can then access the Xero Services to retrieve, update and create contact, invoices etc.
+=back
 
-See L<https://app.xero.com/Application> for more detail.
+This module helps you as much as it can. The details of each step are below.
 
-=head2 TODO
+=head2 REGISTER APPLICATION
 
+Hello.
 
 
 =head1 METHODS
@@ -138,8 +144,6 @@ sub get_request_token ## FOR PUBLIC APP (from old Xero::get_auth_token)
 
     The response is requested in JSON format which is then processed into a Perl structure that
     is returned to the caller.
-
-
 
 =head2 The OAuth Dance
 
