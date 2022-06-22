@@ -393,7 +393,7 @@ sub get_status
 
 =head1 AUTHORS
 
-Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<igibbs@cpan.org>
+Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<<igibbs@cpan.org>>
 
 =head1 BUGS
 

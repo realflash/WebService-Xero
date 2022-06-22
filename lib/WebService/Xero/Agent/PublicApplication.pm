@@ -203,6 +203,8 @@ will return a nice big blob of stuff about the Xero tenant. You can make any cal
 
 =head1 METHODS
 
+See L<WebService::Xero::Agent>
+
 =cut
 
 sub _validate_agent 
@@ -223,22 +225,9 @@ sub _validate_agent
 
 #####################################
 
-=head2 do_xero_api_call()
-
-  INPUT PARAMETERS AS A LIST ( NOT NAMED )
-
-* $uri (required)    - the API endpoint URI ( eg 'https://api.xero.com/api.xro/2.0/Contacts/')
-* $method (optional) - 'POST' or 'GET' .. PUT not currently supported
-* $xml (optional)    - the payload for POST updates as XML
-
-  RETURNS
-
-    The response is requested in JSON format which is then processed into a Perl structure that
-    is returned to the caller.
-
 =head1 AUTHOR
 
-Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<igibbs@cpan.org>
+Peter Scott, C<< <peter at computerpros.com.au> >>; Ian Gibbs C<<igibbs@cpan.org>>
 
 =head1 BUGS
 
