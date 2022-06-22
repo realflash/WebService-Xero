@@ -65,9 +65,9 @@ There are lots of good web pages describing how oAuth 2 works so we will not exp
 
 =back
 
-So, you need a web page that can have this conversation with the user, accept the grant code, and pass it on to your Perl code that uses this module. The authorisation provided by the user to your application lasts 90 days; after this any authorisation tokens stored by your application/this module will be deemed invalid by Xero and you will have to ask the user to authenticate the access again. If you doing some kind of backend process only "used" by one Xero ID on behalf of a whole Xero tenant, this already is going to feel like a whole bunch of crap you didn't want to deal with, and you are now going to go looking for an alternative module or alternative authorisation process that uses some kind of permanent API key. We'll see you back here shortly.
+So, you need a web page that can have this conversation with the user, accept the grant code, and pass it on to your Perl code that uses this module. The authorisation provided by the user to your application lasts 90 days; after this any authorisation tokens stored by your application/this module will be deemed invalid by Xero and you will have to ask the user to authenticate the access again. If you are doing some kind of backend process only "used" by one Xero ID on behalf of a whole Xero tenant, this already is going to feel like a whole load of crap you didn't want to deal with, and you are now going to go looking for an alternative module or alternative authorisation process that uses some kind of permanent API key. We'll see you back here shortly.
 
-If you are building a multi-user web app which will regularly deal with new users and re-authorising existing users you are clearly going to build this web page into your larger app. If you are a planning a one time data export you will want a temporary easy solution to this, which we provide below. The redirect URI needs to be accessible to the user's computer; the one the user's uses to carry out the authorisation of your app in Xero. So your web page doesn't have to be internet-accessible; it could be on the same local network as the user authorising, or even running on localhost on the user's computer (see below). Obviously the computer the user uses to authorise needs to be able to access Xero across the internet AND your Redirect URI at the same time.
+If you are building a multi-user web app which will regularly deal with new users and re-authorising existing users you are clearly going to build this web page into your larger app. If you are a planning a one time data export you will want a temporary easy solution to this, which we provide below. The redirect URI needs to be accessible to the user's computer; the one the user uses to carry out the authorisation of your app in Xero. So your web page doesn't have to be internet-accessible; it could be on the same local network as the user authorising, or even running on localhost on the user's computer (see below). Obviously the computer the user uses to authorise needs to be able to access Xero across the internet AND your Redirect URI at the same time.
 
 Your redirect URI will called with a GET request, with the grant code appended as a URI param:
 
@@ -77,11 +77,27 @@ Your web page needs to pop off that code, and then give it to this module when a
 
 Once you have decided how you are going to do this, you will know what your Redirect URI will be. You need this to register your application with Xero. For a quick hack, see C<examples/oauth2_redirect.pl>, which you can run once to authorise your app and then store credentials. It uses a Redirect URI of C<http://localhost:3000/callback>
 
-Your Redirect URI B<MUST> have a URI fragment: C<https://yourwebserver.com> is not OK, but C<https://yourwebserver.com/callback> is. Your Redirect URI B<MUST> not use  the IP 127.0.0.1; C<https://127.0.0.1/callback> is not OK, but C<https://localhost/callback> is. At the time of writing these things aren't documented by Xero, but if you fall foul of them their firewall will reject your authorisation attempts because it will think you are attempting to perform a client side script injection attack. Don't ask how we know. 
+Your Redirect URI B<MUST> have a URI fragment: 
+
+	https://yourwebserver.com
+
+is not OK, but 
+
+	https://yourwebserver.com/callback
+
+is. Your Redirect URI B<MUST NOT> use the IP 127.0.0.1; 
+
+	https://127.0.0.1/callback
+
+is not OK, but 
+
+	https://localhost/callback
+
+is. At the time of writing these things aren't documented by Xero, but if you fall foul of them their firewall will reject your authorisation attempts because it will think you are attempting to perform a client side script injection attack. Don't ask how we know. 
 
 =head2 2. Register application
 
-Your application must be registered with Xero in order to perform API calls on behalf of Xero users. Registering gets you an oAuth CLient ID and Client Secret that your application can use to authenticate to the API. For the avoidance of doubt, you will be registering your application which may happen to use this library. You are not registering this library. You will give this library the credentials assigned to your application by Xero. 
+Your application must be registered with Xero in order to perform API calls on behalf of Xero users. Registering gets you an oAuth Client ID and Client Secret that your application can use to authenticate to the API. For the avoidance of doubt, you will be registering your application which may happen to use this library. You are not registering this library. You will give this library the credentials assigned to your application by Xero. 
 
 Registering your application with Xero does not make it available to members of the public, and does not publish it in the Xero marketplace. That is an option you can choose later, but you can equally keep it as an internal application.
 
@@ -122,11 +138,11 @@ Now Xero knows about your app, you can now have a user connect their tenant to y
 =item 2. Create a WebService::Xero object and call get_auth_url()
 
 	my $xero = WebService::Xero::Agent::PublicApplication->new( 
-													CLIENT_ID	=> "4DD95A6412A547D3883804C4647F8B2E", 						# Get this from Xero when registering
-													CLIENT_SECRET => "G2ZQBLHonZqi7lwPkHBvhYdeS2b7k7RGZgZ-FWH6ZkgQvNhn",	# Get this from Xero when registering
-													CACHE_FILE => $ENV{"HOME"}.'/.WebServiceXero.cache',					# Per user!
-													AUTH_CODE_URL => "http://localhost:3000/callback",						# Must match what you registered with Xero
-											  );
+		CLIENT_ID	=> "4DD95A6412A547D3883804C4647F8B2E", 			# Get this from Xero when registering
+		CLIENT_SECRET => "G2ZQBLHonZqi7lwPkHBvhYdeS2b7k7RGZgZ-FWH6ZkgQvNhn",	# Get this from Xero when registering
+		CACHE_FILE => $ENV{"HOME"}.'/.WebServiceXero.cache',			# Per user!
+		AUTH_CODE_URL => "http://localhost:3000/callback",			# Must match what you registered with Xero
+	);
 	print $xero->get_auth_url()."\n";
 
 =item 3. Go to the URL with your web browser
@@ -145,13 +161,13 @@ Use this to get an access token:
 
 	$xero->get_access_token(<grant_code>);
 	
-This module will contact the Xero authorisation endpoint and exhange the grant code for an access token, and store it in the cache file you specified. This access token expires, but this module will handle refreshing it automatically, up to the 90 day expiry. After that authorisation will start failing. More methods to help with that will be forthcoming. THis module isn't yet old enough to see what happens when the 90 days is up.
+This module will contact the Xero authorisation endpoint and exhange the grant code for an access token, and store it in the cache file you specified. This access token expires, but this module will handle refreshing it automatically, up to the 90 day expiry. After that authorisation will start failing. More methods to help with that will be forthcoming. This module isn't yet old enough to see what happens when the 90 days is up. 
 
-The access token stored in the cache file is specific to the user that authorised your application. It will allow to access onlt the tenants you specified earlier. If you authorise another user using the same cache file, the original tokens will be overwritten and lost. Use one cache file per user.
+The method returns the access token but only for fun. You don't need to do anything with it; it is stored int he object and also persisted to the cache file. The access token stored in the cache file is specific to the user that authorised your application. It will allow to access onlt the tenants you specified earlier. If you authorise another user using the same cache file, the original tokens will be overwritten and lost. Use one cache file per user.
 
-=head2 5. Set the tentant ID
+=head2 5. Set the tenant ID
 
-With your access token stored in the cache file, you can now call methods provided by this module and start interacting with the Xero API. All API calls must specify the tenant ID that you wish to interact with. This is done like this:
+With your access token stored in the cache file, you can now call methods provided by this module and start interacting with the Xero API. All API calls must specify the tenant ID that you wish to interact with. The module will do this on your behalf once you have set it. This is done like this:
 
 	$xero->{'TENANT_ID'} = <tenant-id>;
 	
@@ -219,79 +235,6 @@ sub _validate_agent
 
     The response is requested in JSON format which is then processed into a Perl structure that
     is returned to the caller.
-
-=head2 The OAuth Dance
-
-Public Applications require the negotiation of a token by directing the user to Xero to authenticate and accepting the callback as the
-user is redirected to your application.
-
-To implement you need to persist token details across multiple user web page requests in your application.
-
-To fully understand the integration implementation requirements it is useful to familiarise yourself with the terminology.
-
-=head3 OAUTH 1.0a TERMINOLOGY
-
-=begin TEXT
-
-User              A user who has an account of the Service Provider (Xero) and tries to use the Consumer. (The API Application config in Xero API Dev Center .)
-Service Provider  Service that provides Open API that uses OAuth. (Xero.)
-Consumer          An application or web service that wants to use functions of the Service Provider through OAuth authentication. (End User)
-Request Token     A value that a Consumer uses to be authorized by the Service Provider After completing authorization, it is exchanged for an Access Token. 
-                    (The identity of the guest.)
-Access Token      A value that contains a key for the Consumer to access the resource of the Service Provider. (A visitor card.)
-
-=end TEXT
-
-
-=head2 Authentication occurs in 3 steps (legs):
-
-=head3 Step 1 - Get an authorisation code
-
-    use WebService::Xero::Agent::PublicApplication;
-
-    my $xero = WebService::Xero::Agent::PublicApplication->new( CLIENT_ID    => 'YOUR_OAUTH_CLIENT_ID', # Get this from Xero Developer site
-                                                          CLIENT_SECRET => 'YOUR_OAUTH_CLIENT_SECRET',  # Get this from Xero Developer site
-                                                          CACHE_FILE => '/tmp/myapp.cache',				# Protect this as it will contain security tokens (but not your client creds)
-                                                          AUTH_CODE_URL    => 'http://127.0.0.1:3000'	# or a URL to some page you create in your existing web app
-                                                          );
-    my $url = $xero->get_auth_url(); 											# This retrieves the URL to give to the user to visit
-    print "Visit this URL to authorise this app to a Xero tenant: $url\n";		# or embed it in a web page somewhere, or send as a redirect
-
-=head3 Step 2 - Redirect User
-
-    user click on link to $xero->{login_url} which takes them to Xero - when they authorise your app they are redirected back to your callback URL (C)(D)
-
-
-=head3 Step 3 - Swap a Request Token for an Access Token
-
-    The callback URL includes extra GET parameters that are used with the token details stored earlier to obtain an access token.
-    
-   my $oauth_verifier = $cgi->url_param('oauth_verifier');
-   my $org            = $cgi->param('org');
-   my $oauth_token    = $cgi->url_param('oauth_token');
-
-   $xero->get_access_token( $oauth_token, $oauth_verifier, $org, $stored_token_secret, $stored_oauth_token ); ## (E)(F)
-
-=head3 Step 4 - Access the Xero API using the access token 
-
-    my $contact_struct = $xero->do_xero_api_call( 'https://api.xero.com/api.xro/2.0/Contacts' );  ## (G)
-
-
-=head2 Other Notes
-
-The access token received will expire after 30 minutes. If you want access for longer you will need the user to re-authorise your application.
-
-Xero API Applications have a limit of 1,000/day and 60/minute request per organisation.
-
-Your application can have access to many organisations at once by going through the authorisation process for each organisation.
-
-=head3 Xero URLs used for authorisation and using the API
-
-Get an Unauthorised Request Token:  https://api.xero.com/oauth/RequestToken
-Redirect a user:  https://api.xero.com/oauth/Authorize
-Swap a Request Token for an Access Token: https://api.xero.com/oauth/AccessToken
-Connect to the Xero API:  https://api.xero.com/api.xro/2.0/
-
 
 =head1 AUTHOR
 
@@ -379,15 +322,6 @@ YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
 CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
 CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
-
-
-=begin HTML
-
-<p><img src="https://oauth.net/core/diagram.png"></p>
-
-=end HTML
 
 =cut
 
