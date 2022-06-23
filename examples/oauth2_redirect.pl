@@ -22,7 +22,7 @@ my $xero = WebService::Xero::Agent::PublicApplication->new(
 												CLIENT_ID	=> <your-client-id>, 										# Get this from Xero when registering
 												CLIENT_SECRET => <your-client-secret>,									# Get this from Xero when registering
 												CACHE_FILE => "/path/to/secure/file/storing/creds/for/this/user",		# Per user
-												AUTH_CODE_URL => "http://localhost:3000/callback",						# Must match what you registered with Xero
+												REDIRECT_URI => "http://localhost:3000/callback",						# Must match what you registered with Xero
 										  );
 print $xero->get_auth_url()."\n";
 

@@ -35,19 +35,13 @@ our $VERSION = '0.13';
 
 This is the base class for the Xero API agents that integrate with the Xero Web Application APIs.
 
-You should not need to use this directly but should use the derived class.
-
-see the following for usage examples:
-
-  perldoc WebService::Xero::Agent::PublicApplication
-
-
+You should not need to use this directly but should use the derived class. See L<WebService::Xero::Agent::PublicApplication>.
 
 =head1 METHODS
 
 =head2 new()
 
-  default base constructor - includes properties used by child class.
+This is the default base constructor - includes properties used by child class. Do not use directly. See L<WebService::Xero::Agent::PublicApplication>.
 
 =cut
 
@@ -61,7 +55,7 @@ sub new
       CLIENT_ID   => $params{CLIENT_ID} || '',
       CLIENT_SECRET => $params{CLIENT_SECRET} || "",
       CACHE_FILE => $params{CACHE_FILE} || "",
-      AUTH_CODE_URL => $params{AUTH_CODE_URL} || "",
+      REDIRECT_URI => $params{REDIRECT_URI} || "",
       TENANT_ID => $params{TENANT_ID} || "",
       ua              => LWP::UserAgent->new(ssl_opts => { verify_hostname => 1 },),
       _status           => undef,
@@ -77,7 +71,7 @@ sub new
 														client_id => $self->{CLIENT_ID},
 														client_secret => $self->{CLIENT_SECRET},
 														scope => 'openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access',
-														redirect_uri => $self->{AUTH_CODE_URL},
+														redirect_uri => $self->{REDIRECT_URI},
 														authorize_url => 'https://login.xero.com/identity/connect/authorize',
 														access_token_url => 'https://identity.xero.com/connect/token',
 														refresh_token_url => 'https://identity.xero.com/connect/token',
@@ -157,7 +151,7 @@ sub get_auth_url
 
 	Exchange the grant code received by your web app for a longer-lived access token
 	
-Once you have authorised this app to a Xero tenant, Xero will call your auth_code_url with parameters like this:
+Once you have authorised this app to a Xero tenant, Xero will call your REDIRECT_URI with parameters like this:
   	?code=8877146d9aaebf16e84566edb9416ab9d9626a15e926fe389ba6dfbbdc34b98c&scope=openid%20profile%20email%20accounting.transactions%20accounting.attachments%20accounting.settings%20accounting.contacts%20offline_access&session_state=NaP2bbCmnUkXNn_5fdZPHMU1QQanRzl3G_Ew-IIF5Ik.84f54ec9f443c0e34d25b3be0157a50f_uri
 	
 Extract that code parameter and then provide it to this method to have us exchange that very short-lived grant code for an access token we can actually use to get to the API. Lives if retrieving an access token was successful, dies if not. The token will be stored in the internal cache, and used for sbusequent calls. 
@@ -176,7 +170,7 @@ sub get_access_token
 	$self->{_cache}->{grant_code} = $grant_code;
 	# Save the access token in the cache in thawed format for immediate use
 	$self->{_cache}->{access_token} = $self->{_oauth}->get_access_token($grant_code, 
-												(grant_type => 'authorization_code', redirect_uri => $self->{AUTH_CODE_URL}));
+												(grant_type => 'authorization_code', redirect_uri => $self->{REDIRECT_URI}));
 	return $self->{_cache}->{access_token};
 }
 

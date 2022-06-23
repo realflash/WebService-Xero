@@ -16,7 +16,7 @@ NAME			=
 CLIENT_ID		= 
 CLIENT_SECRET	=
 # This URL has to be registered on developer.xero.com before it works!
-AUTH_CODE_URL	= http://localhost:3000/auth
+REDIRECT_URI	= http://localhost:3000/auth
 # This testing is potentially destructive to production data. See docs.
 # Looks like "4a7e0a2c-2187-4e96-bbf1-2044a95c5a4c"
 TEST_TENANT_ID = 	

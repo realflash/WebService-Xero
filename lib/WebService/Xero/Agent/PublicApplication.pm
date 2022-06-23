@@ -141,7 +141,7 @@ Now Xero knows about your app, you can now have a user connect their tenant to y
 		CLIENT_ID	=> "4DD95A6412A547D3883804C4647F8B2E", 			# Get this from Xero when registering
 		CLIENT_SECRET => "G2ZQBLHonZqi7lwPkHBvhYdeS2b7k7RGZgZ-FWH6ZkgQvNhn",	# Get this from Xero when registering
 		CACHE_FILE => $ENV{"HOME"}.'/.WebServiceXero.cache',			# Per user!
-		AUTH_CODE_URL => "http://localhost:3000/callback",			# Must match what you registered with Xero
+		REDIRECT_URI => "http://localhost:3000/callback",			# Must match what you registered with Xero
 	);
 	print $xero->get_auth_url()."\n";
 
@@ -203,6 +203,28 @@ will return a nice big blob of stuff about the Xero tenant. You can make any cal
 
 =head1 METHODS
 
+=head2 new(CLIENT_ID => <id>, CLIENT_SECRET => <secret>, CACHE_FILE => <file>, REDIRECT_URI => <url>)
+
+=head2 new(CLIENT_ID => <id>, CLIENT_SECRET => <secret>, CACHE_FILE => <file>, REDIRECT_URI => <url>, NAME => <name>)
+
+Create a new instance of this module, with the minimum required parameters to perform successful authentication. The parameters are:
+
+=head3 CLIENT_ID and CLIENT_SECRET
+
+Mandatory. Retrievable from the Xero Developer web site when you register your application. See L</SETUP>. Used to identify your app when this module talks to the Xero OAuth endpoint to get and refresh access tokens in behalf of the user that authenticated your application.
+
+These data should be secured; anyone who got hold of them and a user refresh token could act on behalf of the user without further information.
+
+=head3 CACHE_FILE
+
+Path to a file that this module should store access and refresh tokens in. All the tokens for one user are stored in this file, so if you are handling multiple users you should create a different object pointing to a different cache file for each user. Tokens are not stored keyed to a particular user in this file, so if you re-use a file name for a different user you will overwrite any stored data. Storage of tokens is necessary because the access tokens only last for 30 minutes. After that the refresh token must be used to get another access token. 
+
+These files should be secured; anyone who got hold of a refresh token and your client ID and secret act on behalf of the user without further information.
+
+=head3 REDIRECT_URI
+
+
+
 See L<WebService::Xero::Agent>
 
 =cut
@@ -214,10 +236,10 @@ sub _validate_agent
 	unless($self->{CLIENT_ID}){ $self->_error("No client ID specified in constructor"); return $self; }
 	unless($self->{CLIENT_SECRET}) { $self->_error("No client secret specified in constructor"); return $self; }
 	unless($self->{CACHE_FILE}){ $self->_error("No cache file specified in constructor"); return $self; }
-	unless($self->{AUTH_CODE_URL}) { $self->_error("No auth code URL specified in constructor"); return $self; }
+	unless($self->{REDIRECT_URI}) { $self->_error("No auth code URL specified in constructor"); return $self; }
 	unless(length($self->{CLIENT_ID}) >= 32) { $self->_error("Client ID too short"); return $self; }
 	unless(length($self->{CLIENT_SECRET}) >= 48) { $self->_error("Client secret too short"); return $self; }
-	unless(is_uri($self->{AUTH_CODE_URL})) { $self->_error("Auth code URL is not a valid HTTP or HTTPS URL"); return $self; }
+	unless(is_uri($self->{REDIRECT_URI})) { $self->_error("Auth code URL is not a valid HTTP or HTTPS URL"); return $self; }
 	#~ $_log->trace("Constructor got these params: ".dump(@_));
 
 	return $self;

@@ -38,7 +38,7 @@ This is the simplest possible implementation:
 													CLIENT_ID	=> "<get_this_when_registering>",
 													CLIENT_SECRET => "<get_this_when_registering>",
 													CACHE_FILE => "/path/to/secured/file/you/want/to/store/tokens/in",
-													AUTH_CODE_URL => "http://localhost:3000/auth",	# Web page you make and register the URL of with Xero
+													REDIRECT_URI => "http://localhost:3000/auth",	# Web page you make and register the URL of with Xero
 																									# In order to receive your grant code and and access tokens
 																									# Quick shortcut for this documented below
 													);
@@ -46,7 +46,7 @@ This is the simplest possible implementation:
 	print $xero->get_auth_url()."\n";									# User clicks this link in their web browser to authenticate your app to their tenant
 																		# Once every 90 days
 	
-	# Once user has authorised your app, Xero will call your AUTH_CODE_URL and append ?code=<your-grant-code>
+	# Once user has authorised your app, Xero will call your REDIRECT_URI and append ?code=<your-grant-code>
 	# Your web page will have to pass this to your code
 	$xero->get_access_token(<your_grant_code>);
 	
