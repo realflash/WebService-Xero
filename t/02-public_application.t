@@ -235,15 +235,14 @@ SKIP: {
 	
 	SKIP: {
 		skip ("You are authorised to access one or more tenants but the tenant configured for testing is not one of them.") unless $testing_tenant;
-		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
-	}
 
-	# Now check that GET, PUT and POST calls against the test tenant all work as expected
-	$xero->{'TENANT_ID'} = $testing_tenant->{'tenantId'};
-	# PUT a new contact - here's Xero's example:
-	#{ "Contacts": [ { "ContactID": "3ff6d40c-af9a-40a3-89ce-3c1556a25591", "ContactStatus": "ACTIVE", "Name": "Foo9987", "EmailAddress": "sid32476@blah.com", "BankAccountDetails": "", "Addresses": [ { "AddressType": "STREET", "City": "", "Region": "", "PostalCode": "", "Country": "" }, { "AddressType": "POBOX", "City": "", "Region": "", "PostalCode": "", "Country": "" } ], "Phones": [ { "PhoneType": "DEFAULT", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "DDI", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "FAX", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "MOBILE", "PhoneNumber": "555-1212", "PhoneAreaCode": "415", "PhoneCountryCode": "" } ], "UpdatedDateUTC": "/Date(1551399321043+0000)/", "ContactGroups": [], "IsSupplier": false, "IsCustomer": false, "SalesTrackingCategories": [], "PurchasesTrackingCategories": [], "PaymentTerms": { "Bills": { "Day": 15, "Type": "OFCURRENTMONTH" }, "Sales": { "Day": 10, "Type": "DAYSAFTERBILLMONTH" } }, "ContactPersons": [] } ] }
-	my $random_contact_name = "WSX_".int(rand(1000000));
-	my $test_contact_json = '
+		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
+		# Now check that GET, PUT and POST calls against the test tenant all work as expected
+		$xero->{'TENANT_ID'} = $testing_tenant->{'tenantId'};
+		# PUT a new contact - here's Xero's example:
+		#{ "Contacts": [ { "ContactID": "3ff6d40c-af9a-40a3-89ce-3c1556a25591", "ContactStatus": "ACTIVE", "Name": "Foo9987", "EmailAddress": "sid32476@blah.com", "BankAccountDetails": "", "Addresses": [ { "AddressType": "STREET", "City": "", "Region": "", "PostalCode": "", "Country": "" }, { "AddressType": "POBOX", "City": "", "Region": "", "PostalCode": "", "Country": "" } ], "Phones": [ { "PhoneType": "DEFAULT", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "DDI", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "FAX", "PhoneNumber": "", "PhoneAreaCode": "", "PhoneCountryCode": "" }, { "PhoneType": "MOBILE", "PhoneNumber": "555-1212", "PhoneAreaCode": "415", "PhoneCountryCode": "" } ], "UpdatedDateUTC": "/Date(1551399321043+0000)/", "ContactGroups": [], "IsSupplier": false, "IsCustomer": false, "SalesTrackingCategories": [], "PurchasesTrackingCategories": [], "PaymentTerms": { "Bills": { "Day": 15, "Type": "OFCURRENTMONTH" }, "Sales": { "Day": 10, "Type": "DAYSAFTERBILLMONTH" } }, "ContactPersons": [] } ] }
+		my $random_contact_name = "WSX_".int(rand(1000000));
+		my $test_contact_json = '
 {
 	"Contacts": [
 		{
@@ -251,22 +250,22 @@ SKIP: {
 		}
 	]
 } 
-';
-	my $response; 
-	note("Access token expires at ".$expiry_time->iso8601()."Z");
-	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "PUT", $test_contact_json) } "PUT a new contact successfully";
-	is($response->{'Status'}, "OK", "API reports success");
-	my $contact = $response->{'Contacts'}[0];
-	my $contact_id = $contact->{'ContactID'};
+		';
+		my $response; 
+		note("Access token expires at ".$expiry_time->iso8601()."Z");
+		try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "PUT", $test_contact_json) } "PUT a new contact successfully";
+		is($response->{'Status'}, "OK", "API reports success");
+		my $contact = $response->{'Contacts'}[0];
+		my $contact_id = $contact->{'ContactID'};
 
-	# GET a contact
-	note("Access token expires at ".$expiry_time->iso8601()."Z");
-	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id") } "GET the contact";
-	is($response->{'Status'}, "OK", "API reports success");
-	is($response->{'Contacts'}[0]->{'Name'}, $random_contact_name, "Expected contact was returned");
+		# GET a contact
+		note("Access token expires at ".$expiry_time->iso8601()."Z");
+		try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id") } "GET the contact";
+		is($response->{'Status'}, "OK", "API reports success");
+		is($response->{'Contacts'}[0]->{'Name'}, $random_contact_name, "Expected contact was returned");
 
-	# PUT an existing contact
-	$test_contact_json = '
+		# PUT an existing contact
+		$test_contact_json = '
 {
 	"Contacts": [
 		{
@@ -275,50 +274,50 @@ SKIP: {
 		}
 	]
 } 
-	';
-	# This should return this truly terrible error response:
-	#UNRECOGNISED API ERROR '{"Title":"An error occurred","Detail":"An error occurred in Xero. Check the API Status page http://status.developer.xero.com for current service status.","Status":500,"Instance":"b90a8446-13fc-4ea1-b950-7652d8710fda"}'
-	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
-	is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
+		';
+		# This should return this truly terrible error response:
+		#UNRECOGNISED API ERROR '{"Title":"An error occurred","Detail":"An error occurred in Xero. Check the API Status page http://status.developer.xero.com for current service status.","Status":500,"Instance":"b90a8446-13fc-4ea1-b950-7652d8710fda"}'
+		like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
+		is($response->{'Status'}, "OK", "API reports success");				# This doesn't seem right, though. If Xero threw an error, we should too
 
-	# Attach a file to something
-	my $test_file = "chameleon.jpg";									# 300Kb. Enough to not be trivial.
-	my $test_file_path = "$RealBin/$test_file";
-	my $test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
-	open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
-	binmode $fh;
-	try_ok { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); } "Attach a file to a contact";
-	close $fh;
-	# Download the file again to confirm it got there OK.
-	my $downloaded_file_path;
-	try_ok { $downloaded_file_path = $xero->do_xero_api_call($test_file_uri, "GET"); } "Attach a file to a contact";
-	
-	# Check the file we get back is the same as what we uploaded
-	open($fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
-	binmode $fh;
-	my $md5 = Digest::MD5->new; $md5->addfile($fh);
-	my $test_file_md5 = $md5->hexdigest();
-	close $fh;
-	open($fh, "<", $downloaded_file_path) or die "Couldn't open downloaded test file $response";
-	binmode $fh;
-	$md5 = Digest::MD5->new;
-	$md5->addfile($fh);
-	my $returned_file_md5 = $md5->hexdigest();
-	close $fh;
-	is($returned_file_md5, $test_file_md5, "File we downloaded is the same as the one we uploaded");
-	
-	# Try to upload a file that the API would reject because it is too large
-	like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
-	$test_file = "too_big.jpg";											# 11Mb - 1Mb over limit
-	$test_file_path = "$RealBin/$test_file";
-	$test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
-	open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
-	binmode $fh;
-	like( dies { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); }, qr/TOO LARGE/, "Reject a file that is larger than the API's max file size");
-	close $fh;
+		# Attach a file to something
+		my $test_file = "chameleon.jpg";									# 300Kb. Enough to not be trivial.
+		my $test_file_path = "$RealBin/$test_file";
+		my $test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
+		open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
+		binmode $fh;
+		try_ok { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); } "Attach a file to a contact";
+		close $fh;
+		# Download the file again to confirm it got there OK.
+		my $downloaded_file_path;
+		try_ok { $downloaded_file_path = $xero->do_xero_api_call($test_file_uri, "GET"); } "Attach a file to a contact";
+		
+		# Check the file we get back is the same as what we uploaded
+		open($fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
+		binmode $fh;
+		my $md5 = Digest::MD5->new; $md5->addfile($fh);
+		my $test_file_md5 = $md5->hexdigest();
+		close $fh;
+		open($fh, "<", $downloaded_file_path) or die "Couldn't open downloaded test file $response";
+		binmode $fh;
+		$md5 = Digest::MD5->new;
+		$md5->addfile($fh);
+		my $returned_file_md5 = $md5->hexdigest();
+		close $fh;
+		is($returned_file_md5, $test_file_md5, "File we downloaded is the same as the one we uploaded");
+		
+		# Try to upload a file that the API would reject because it is too large
+		like( dies { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id", "PUT", $test_contact_json); }, qr/UNRECOGNISED API ERROR/, "PUT a new contact which conflicts with an existing contact");								
+		$test_file = "too_big.jpg";											# 11Mb - 1Mb over limit
+		$test_file_path = "$RealBin/$test_file";
+		$test_file_uri = "https://api.xero.com/api.xro/2.0/Contacts/$contact_id/Attachments/$test_file";
+		open(my $fh, "<", $test_file_path) or die "Couldn't open test file $test_file_path";
+		binmode $fh;
+		like( dies { $response = $xero->do_xero_api_call($test_file_uri, "PUT", $fh); }, qr/TOO LARGE/, "Reject a file that is larger than the API's max file size");
+		close $fh;
 
-	#~ # POST an update to a contact (archiving the mess we made earlier)
-	$test_contact_json = '
+		#~ # POST an update to a contact (archiving the mess we made earlier)
+		$test_contact_json = '
 {
 	"Contacts": [
 		{
@@ -327,9 +326,11 @@ SKIP: {
 		}
 	]
 } 
-	';
-	try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
-	is($response->{'Status'}, "OK", "API reports success");
+		';
+		try_ok { $response = $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts", "POST", $test_contact_json) } "POST an update to a contact successfully";
+		is($response->{'Status'}, "OK", "API reports success");
+	}
+
 
 	TODO: {
 		todo_skip('stuff not re-implemented yet',1);
