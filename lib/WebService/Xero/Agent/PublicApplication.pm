@@ -217,15 +217,17 @@ These data should be secured; anyone who got hold of them and a user refresh tok
 
 =head3 CACHE_FILE
 
-Path to a file that this module should store access and refresh tokens in. All the tokens for one user are stored in this file, so if you are handling multiple users you should create a different object pointing to a different cache file for each user. Tokens are not stored keyed to a particular user in this file, so if you re-use a file name for a different user you will overwrite any stored data. Storage of tokens is necessary because the access tokens only last for 30 minutes. After that the refresh token must be used to get another access token. 
+Mandatory. Path to a file that this module should store access and refresh tokens in. All the tokens for one user are stored in this file, so if you are handling multiple users you should create a different object pointing to a different cache file for each user. Tokens are not stored keyed to a particular user in this file, so if you re-use a file name for a different user you will overwrite any stored data. Storage of tokens is necessary because the access tokens only last for 30 minutes. After that the refresh token must be used to get another access token. 
 
 These files should be secured; anyone who got hold of a refresh token and your client ID and secret act on behalf of the user without further information.
 
 =head3 REDIRECT_URI
 
+Mandatory. The URI of your web page that you are running, ready to catch the grant code Xero will return when trying to get an access token. See L</1. Set up web page for redirect>/
 
+=head3 NAME
 
-See L<WebService::Xero::Agent>
+The name of your application. Used in debugging output. 
 
 =cut
 
