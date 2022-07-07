@@ -70,7 +70,7 @@ sub new
 	$self->{_oauth} = Net::OAuth2::Profile::WebServer->new( name => 'Xero',
 														client_id => $self->{CLIENT_ID},
 														client_secret => $self->{CLIENT_SECRET},
-														scope => 'openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access accounting.journals.read accounting.reports.read accounting.reports.tenninetynine.read accounting.budgets.read',
+														scope => 'openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access',
 														redirect_uri => $self->{REDIRECT_URI},
 														authorize_url => 'https://login.xero.com/identity/connect/authorize',
 														access_token_url => 'https://identity.xero.com/connect/token',
