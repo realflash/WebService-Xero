@@ -207,6 +207,8 @@ will return a nice big blob of stuff about the Xero tenant. You can make any cal
 
 =head2 new(CLIENT_ID => <id>, CLIENT_SECRET => <secret>, CACHE_FILE => <file>, REDIRECT_URI => <url>, NAME => <name>)
 
+=head2 new(CLIENT_ID => <id>, CLIENT_SECRET => <secret>, CACHE_FILE => <file>, REDIRECT_URI => <url>, SCOPE => <scope>)
+
 Create a new instance of this module, with the minimum required parameters to perform successful authentication. The parameters are:
 
 =head3 CLIENT_ID and CLIENT_SECRET
@@ -228,6 +230,14 @@ Mandatory. The URI of your web page that you are running, ready to catch the gra
 =head3 NAME
 
 The name of your application. Used in debugging output. 
+
+=head3 SCOPE
+
+The API permissions that you want to be granted. See L<here|https://developer.xero.com/documentation/guides/oauth2/scopes> for information on all the scopes available. If you don't have the permission you need, then your subsequent API queries will result in an B<AuthorizationUnsuccessful> error. If you don't specify this, the default is 
+ 
+	openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access
+	
+You B<must> include offline_access in order for this module to work.
 
 =cut
 
