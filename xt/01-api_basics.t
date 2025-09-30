@@ -2,7 +2,7 @@
 use 5.006;
 use strict;
 use warnings;
-use Data::Dump qw(dump);
+use Data::Dumper;
 use Test::More 0.98;
 use Test2::Tools::Exception qw/dies lives try_ok/;
 use File::Slurp;
@@ -34,7 +34,7 @@ my $callback_url = 'http://localhost:3000/auth';						# WARNING: the Xero OAuth 
 																		# in the test config
 																			
 SKIP: {
-	skip ("active agent tests; no config found in ./t/config/test_config.ini") unless -e './t/config/test_config.ini' ;
+	BAIL_OUT("FATAL: active agent tests require ./t/config/test_config.ini to be present. Copy from t/config/test_config.tpl and edit.") unless -e './t/config/test_config.ini' ;
 	note(" --- Running authentication tests - loading config ./t/config/test_config.ini");
 
 	## VALIDATE CONFIGURATION FILE
@@ -48,6 +48,7 @@ SKIP: {
 																				# in this tenant. There is a demo company in Xero that anyone can join and mess about with. It's called
 																				# "Demo Company (UK)". It gets reset sometimes, and the tenant ID changes so this test config will need
 																				# to be updated and this library re-connected.
+	$test_tenant_id =~ s/"//g;
 	# Initialise with config file
 	try_ok {$xero = WebService::Xero::Agent::PublicApplication->new( 
 													NAME			=> $config->{'PUBLIC_APPLICATION'}->{'NAME'},
@@ -124,15 +125,18 @@ SKIP: {
 	my $testing_tenant;
 	foreach my $tenant (@$tenants)
 	{
+		note("Searching for tenant $test_tenant_id");
 		if($tenant->{'tenantId'} eq $test_tenant_id)
 		{
+			note("Found tenant $test_tenant_id");
 			$testing_tenant = $tenant;
 		}
 		note("You have access to tenant ".$tenant->{'tenantName'}." (".$tenant->{'tenantId'}.")");
 	}
+	note(Dumper($testing_tenant));
 	
 	SKIP: {
-		skip ("You are authorised to access one or more tenants but the tenant configured for testing is not one of them.") unless $testing_tenant;
+		skip ("You are authorised to access one or more tenants but the tenant configured for testing ('$test_tenant_id') is not one of them.") unless $testing_tenant;
 
 		note ("Continuing testing; using tenant ".$testing_tenant->{'tenantName'}." (".$testing_tenant->{'tenantId'}.")");
 		# Now check that GET, PUT and POST calls against the test tenant all work as expected
