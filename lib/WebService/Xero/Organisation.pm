@@ -1,9 +1,19 @@
 package WebService::Xero::Organisation;
 
-use 5.006;
 use strict;
 use warnings;
 use Carp;
+use Try::Tiny;
+use Class::Tiny qw/APIKey Name LegalName PaysTax Version OrganisationType BaseCurrency CountryCode IsDemoCompany OrganisationStatus 
+                     RegistrationNumber EmployerIdentificationNumber TaxNumber FinancialYearEndDay FinancialYearEndMonth 
+                    SalesTaxBasis SalesTaxPeriod DefaultSalesTax DefaultPurchasesTax PeriodLockDate EndOfYearLockDate
+                    CreatedDateUTC Timezone OrganisationEntityType ShortCode OrganisationID Edition Class LineOfBusiness
+                    Addresses Phones ExternalLinks PaymentTermEdition Class
+                         /, {
+                   API_URL      => 'https://api.xero.com/api.xro/2.0/organisation',
+
+                    };
+    
 
 =head1 NAME
 
@@ -17,12 +27,7 @@ Version 0.13
 
 our $VERSION = '0.13';
 
-our @PROPERTIES = qw/APIKey Name LegalName PaysTax Version BaseCurrency CountryCode IsDemoCompany OrganisationStatus 
-                     RegistrationNumber TaxNumber FinancialYearEndDay FinancialYearEndMonth 
-                    SalesTaxBasis SalesTaxPeriod DefaultSalesTax DefaultPurchasesTax PeriodLockDate EndOfYearLockDate
-                    CreatedDateUTC OrganisationEntityType OrganisationType Timezone ShortCode LineOfBusiness
-                    Addresses Phones ExternalLinks PaymentTerms
-                         /;
+our @PROPERTIES = ;
 
 ## ValidationErrors Warnings
 
@@ -31,54 +36,26 @@ our @PROPERTIES = qw/APIKey Name LegalName PaysTax Version BaseCurrency CountryC
 Object to describe an Organisation record as specified by Xero API and the associated DTD at 
 L<https://github.com/XeroAPI/XeroAPI-Schemas/blob/master/src/main/resources/XeroSchemas/v2.00/Organisation.xsd>.
 
-Perhaps a little code snippet.
-
-    use  WebService::Xero::Organisation;
-
-    my $org =  WebService::Xero::Organisation->new();
-    
-    or
-
-    my $org = $xero_agent->api_account_organisation();
-
-
 =head1 METHODS
 
 =head2 new()
 
 =cut
 
-sub new 
-{
-  my ( $class, %params ) = @_;
+=head2 get_self()
 
-    my $self = bless 
-    {
-      API_URL      => 'https://api.xero.com/api.xro/2.0/organisation',
-      debug        => $params{debug} ## NOT REALLY USED YET
-    }, $class;
-    foreach my $key (@PROPERTIES) { 
-      ## $self->{$key} = $params{$key} || '' 
-      $self->{$key} = defined $params{$key} ? $params{$key} : ''; ## thanks to https://metacpan.org/author/STEVEB
-    }
-
-    return $self; #->_validate_agent(); ## derived classes will validate this
-
-}
-
-
-=head2 new_from_api_data()
-
-  creates a new instance from the data provided by querying the API organisation end point 
-  ( typically handled by WebService::Xero::Agent->api_account_organisation() which calls this method )
+  Creates a new instance from the data provided by querying the API organisation end point.See L<https://developer.xero.com/documentation/api/accounting/organisation> for information on what this will return.
 
 =cut 
 
-sub new_from_api_data
+sub get_self()
 {
   my ( $self, $data ) = @_;
+  my $response;
+  try {
+    £response= $xero->do_xero_api_call("https://api.xero.com/api.xro/2.0/Contacts/$contact_id");
+  }
   return $self->new(  %{$data->{Organisations}[0]} ) if ( ref($data->{Organisations}) eq 'ARRAY' and scalar(@{$data->{Organisations}})==1 );  
-  return $self->new( debug=> $data );  
 
 }
 
@@ -101,11 +78,6 @@ sub as_text
 
 
 
-=head1 TODO
-
-  consider inclusion of Locale modules - Locale::Currency and Locale::Country
-
-
 =head1 AUTHOR
 
 Peter Scott, C<< <peter at computerpros.com.au> >>
@@ -119,8 +91,6 @@ Peter Scott, C<< <peter at computerpros.com.au> >>
 Please report any bugs or feature requests to C<bug-ccp-xero at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CCP-Xero>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
 
 
 =head1 SUPPORT
