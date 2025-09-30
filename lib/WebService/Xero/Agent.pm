@@ -49,12 +49,27 @@ sub new
 {
   my ( $class, %params ) = @_;
 
+	my $untainted_cache_file; # This will hold the untainted version of the cache file path
+	# Untaint the cache file path if it's tainted, before it's used anywhere.
+	if ( defined($params{CACHE_FILE}) && substr( $params{CACHE_FILE}, 0, 0 ) ne '' ) {    # Tainted?
+		if ( $params{CACHE_FILE} =~ /^([-\/\w\.]+)$/ ) {
+			$untainted_cache_file = $1;                     # Untainted
+		}
+		else {
+			croak(
+				"Bad characters in cache file path '$params{CACHE_FILE}'");
+		}
+	}
+	else {
+		$untainted_cache_file = $params{CACHE_FILE}; # Not tainted, so just assign it
+	}
+
     my $self = bless 
     {
       NAME           => $params{NAME} || 'Unnamed Application',
       CLIENT_ID   => $params{CLIENT_ID} || '',
       CLIENT_SECRET => $params{CLIENT_SECRET} || "",
-      CACHE_FILE => $params{CACHE_FILE} || "",
+      CACHE_FILE => $untainted_cache_file || "",
       REDIRECT_URI => $params{REDIRECT_URI} || "",
       TENANT_ID => $params{TENANT_ID} || "",
       SCOPE => $params{SCOPE} || "openid profile email accounting.transactions accounting.attachments accounting.settings accounting.contacts offline_access",
@@ -67,7 +82,6 @@ sub new
     $self->_validate_agent();	## derived classes to validate required properties
 								## This should have croaked if anything was wrong with our constructor params
 								
-	# Initialise OAuth object
 	$self->{_oauth} = Net::OAuth2::Profile::WebServer->new( name => 'Xero',
 														client_id => $self->{CLIENT_ID},
 														client_secret => $self->{CLIENT_SECRET},
@@ -178,11 +192,11 @@ sub get_access_token
 sub DESTROY
 {
 	my $self = shift;
-	
 	if($self->{_cache}->{access_token})
 	{
 		$self->{_cache}->{access_token} = $self->{_cache}->{access_token}->session_freeze();	# Save the access token in the cache in frozen format for storage
-		unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache
+		# print STDERR "in save cache\n";
+		unless(store $self->{_cache}, $self->{CACHE_FILE})					# Save the cache. No need for untainted copy here as we aren't reading.
 		{	# Write was attempted and went wrong somehow
 			return $self->_error("Couldn't write to cache file: $@");
 		}
