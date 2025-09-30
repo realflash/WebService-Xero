@@ -27,7 +27,11 @@ WriteMakefile(
         'JSON'						=> 0,
         'Data::Validate::URI'		=> 0,
         'URI::QueryParam'			=> 0,
-        'Test::HTTP::MockServer::Once'	=> 0
+        'Test::HTTP::MockServer::Once'	=> 0,
+        'Mozilla::CA'				=> 0,
+        'URI::Encode'				=> 0,
+        'Net::OAuth2'				=> 0,
+        'Data::Random'				=> 0
     },
     PREREQ_PM => {
         'Try::Tiny'				=> 0,
